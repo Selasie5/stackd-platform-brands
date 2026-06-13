@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Stackd Platform | Brand',
       },
     ],
     links: [
@@ -53,7 +53,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <PostHogProvider>
           {children}
-          <TanStackDevtools
+          {/* <TanStackDevtools
             config={{
               position: 'bottom-right',
             }}
@@ -64,7 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               },
               TanStackQueryDevtools,
             ]}
-          />
+          /> */}
         </PostHogProvider>
         <Scripts />
       </body>
