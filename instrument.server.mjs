@@ -7,6 +7,12 @@ if (!sentryDsn) {
 } else {
   Sentry.init({
     dsn: sentryDsn,
+    integrations: [
+      // Temporarily send console.log, console.warn, and console.error as logs to Sentry
+      Sentry.consoleLoggingIntegration({ levels: ['log', 'warn', 'error'] }),
+    ],
+    // Enable logs to be sent to Sentry (temporary — for dashboard setup)
+    _experiments: { enableLogs: true },
     // Adds request headers and IP for users, for more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/tanstackstart-react/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
