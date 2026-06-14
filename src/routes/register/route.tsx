@@ -8,7 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Select } from '@/components/ui/select'
 import { AuthShell } from '@/components/auth-shell'
-import { ChevronRight, ChevronLeft, Upload, ChevronDown } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Upload } from 'lucide-react'
+import { useRegisterBrand } from '@/hooks/use-auth'
 
 const registerSearchSchema = z.object({
   step: z.coerce.number().int().min(1).max(2).optional(),
@@ -55,9 +56,13 @@ function RegisterRoute() {
     industry: '',
     country: '',
     currency: '',
+    city: '',
   })
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [logoFile, setLogoFile] = React.useState<File | null>(null)
+
+  const { registerBrand, loading: isSubmitting } = useRegisterBrand()
+  const [isUploading, setIsUploading] = React.useState(false)
 
   const setStep = (newStep: number) => {
     navigate({
@@ -83,6 +88,7 @@ function RegisterRoute() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setLogoFile(file)
       setFormData((prev) => ({ ...prev, logoUrl: URL.createObjectURL(file) }))
     }
   }
@@ -91,16 +97,52 @@ function RegisterRoute() {
     fileInputRef.current?.click()
   }
 
-  const handleNext = (e: React.FormEvent) => {
+  const handleNext = async (e: React.FormEvent) => {
     e.preventDefault()
     if (step === 1) {
       setStep(2)
     } else {
-      setIsSubmitting(true)
-      console.log('Submitting Registration:', formData)
-      setTimeout(() => {
-        setIsSubmitting(false)
-      }, 2000)
+      let finalLogoUrl = formData.logoUrl || undefined
+
+      if (logoFile) {
+        try {
+          setIsUploading(true)
+          
+          const uploadData = new FormData()
+          uploadData.append('file', logoFile)
+          uploadData.append('upload_preset', 'domus-console')
+
+          const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/dviigplcx/image/upload`, {
+            method: 'POST',
+            body: uploadData,
+          })
+
+          if (!uploadRes.ok) throw new Error('Failed to upload image')
+
+          const uploadResult = await uploadRes.json()
+          finalLogoUrl = uploadResult.secure_url
+        } catch (error) {
+          console.error('Upload error:', error)
+          setIsUploading(false)
+          return
+        } finally {
+          setIsUploading(false)
+        }
+      }
+
+      await registerBrand({
+        email: formData.email,
+        password: formData.password,
+        brandName: formData.brandName,
+        contactName: formData.contactName,
+        country: formData.country,
+        currency: formData.currency || undefined,
+        industry: formData.industry,
+        city: formData.city,
+        description: formData.description,
+        website: formData.website || undefined,
+        logoUrl: finalLogoUrl,
+      })
     }
   }
 
@@ -108,7 +150,6 @@ function RegisterRoute() {
     setStep(1)
   }
 
-  const selectedCountry = COUNTRIES.find((c) => c.value === formData.country)
 
   const backButtonPill = (
     <button 
@@ -278,15 +319,27 @@ function RegisterRoute() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-zinc-700 dark:text-zinc-300">Description</Label>
-              <Input 
-                id="description" 
-                value={formData.description} 
-                onChange={handleInputChange} 
-                className="border-zinc-200 dark:border-zinc-800" 
-                required
-              />
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city" className="text-zinc-700 dark:text-zinc-300">City</Label>
+                <Input 
+                  id="city" 
+                  value={formData.city} 
+                  onChange={handleInputChange} 
+                  className="border-zinc-200 dark:border-zinc-800" 
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-zinc-700 dark:text-zinc-300">Description</Label>
+                <Input 
+                  id="description" 
+                  value={formData.description} 
+                  onChange={handleInputChange} 
+                  className="border-zinc-200 dark:border-zinc-800" 
+                  required
+                />
+              </div>
             </div>
 
             <div className="flex items-start space-x-3 pt-2">
@@ -315,7 +368,7 @@ function RegisterRoute() {
             </div>
 
             <div className="pt-4">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting || isUploading}>
                 Create account
               </Button>
             </div>

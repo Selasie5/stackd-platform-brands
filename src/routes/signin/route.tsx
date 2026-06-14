@@ -6,6 +6,12 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { AuthShell } from '@/components/auth-shell'
+import {
+  useLogin,
+  useRequestPasswordReset,
+  useResetPassword,
+  useResendVerificationEmail,
+} from '@/hooks/use-auth'
 
 const searchSchema = z.object({
   action: z.enum(['forgot-password', 'check-email', 'reset-password', 'verify-email']).optional(),
@@ -27,7 +33,10 @@ function SignInRoute() {
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [otp, setOtp] = React.useState(['', '', '', '', '', ''])
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const { login, loading: loginLoading } = useLogin()
+  const { requestReset, loading: resetRequestLoading } = useRequestPasswordReset()
+  const { resetPassword, loading: resetLoading } = useResetPassword()
+  const { resendEmail, loading: resendLoading } = useResendVerificationEmail()
 
 
   const setAction = (newAction: typeof action) => {
@@ -58,26 +67,32 @@ function SignInRoute() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      if (!action) {
-        console.log('Sign In submit:', { email, password })
-      } else if (action === 'forgot-password') {
-        console.log('Forgot password submit:', email)
-        setAction('check-email')
-      } else if (action === 'check-email') {
-        console.log('Verify OTP:', otp.join(''))
-        setAction('reset-password')
-      } else if (action === 'reset-password') {
-        console.log('Reset Password submit:', { newPassword, confirmPassword })
-        setAction(undefined)
-      } else if (action === 'verify-email') {
-        console.log('Resend verification email')
-      }
-    }, 1500)
+    await login({ email, password })
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const success = await requestReset(email)
+    if (success) setAction('check-email')
+  }
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAction('reset-password')
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const otpCode = otp.join('')
+    const success = await resetPassword(email, otpCode, newPassword)
+    if (success) setAction(undefined)
+  }
+
+  const handleResendVerification = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await resendEmail(email)
   }
 
   switch (action) {
@@ -90,7 +105,7 @@ function SignInRoute() {
           topRightLinkText="Sign In"
           topRightLinkTo="/signin"
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleForgotPassword}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">E-mail</Label>
               <Input
@@ -103,7 +118,7 @@ function SignInRoute() {
               />
             </div>
             <div className="pt-2">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={resetRequestLoading}>
                 Send verification code
               </Button>
             </div>
@@ -120,7 +135,7 @@ function SignInRoute() {
           topRightLinkText="Sign In"
           topRightLinkTo="/signin"
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleVerifyOtp}>
             <div className="flex justify-between items-center max-w-[360px] mx-auto py-4">
               {otp.map((digit, index) => (
                 <input
@@ -139,7 +154,7 @@ function SignInRoute() {
               ))}
             </div>
             <div className="pt-2 space-y-4 text-center">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl">
                 Verify code
               </Button>
               <button
@@ -163,7 +178,7 @@ function SignInRoute() {
           topRightLinkText="Sign In"
           topRightLinkTo="/signin"
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleResetPassword}>
             <div className="space-y-2">
               <Label htmlFor="newPassword" className="text-zinc-700 dark:text-zinc-300">New Password</Label>
               <PasswordInput
@@ -185,7 +200,7 @@ function SignInRoute() {
               />
             </div>
             <div className="pt-2">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={resetLoading}>
                 Reset password
               </Button>
             </div>
@@ -203,9 +218,9 @@ function SignInRoute() {
           topRightLinkText="Sign In"
           topRightLinkTo="/signin"
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleResendVerification}>
             <div className="pt-4 space-y-4 text-center">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={resendLoading}>
                 Resend verification email
               </Button>
               <div>
@@ -230,7 +245,7 @@ function SignInRoute() {
           topRightLinkText="Sign Up"
           topRightLinkTo="/register"
         >
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleLogin}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">E-mail</Label>
               <Input
@@ -262,7 +277,7 @@ function SignInRoute() {
               />
             </div>
             <div className="pt-4">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={isSubmitting}>
+              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={loginLoading}>
                 Sign In
               </Button>
             </div>

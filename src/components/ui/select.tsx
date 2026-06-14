@@ -18,8 +18,7 @@ export interface SelectProps {
   className?: string
 }
 
-const Select = React.forwardRef<HTMLDivElement, SelectProps>(
-  ({ value, onChange, options, placeholder = "Select...", disabled = false, className }, ref) => {
+const Select = ({ value, onChange, options, placeholder = "Select...", disabled = false, className }: SelectProps) => {
     const [isOpen, setIsOpen] = React.useState(false)
     const containerRef = React.useRef<HTMLDivElement>(null)
 
@@ -85,8 +84,7 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
         )}
       </div>
     )
-  }
-)
+}
 Select.displayName = "Select"
 
 export { Select }
