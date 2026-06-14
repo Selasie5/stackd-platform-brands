@@ -15,6 +15,7 @@ import appCss from '../styles.css?url'
 import type { ApolloClientIntegration } from '@apollo/client-integration-tanstack-start'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
 interface MyRouterContext extends ApolloClientIntegration.RouterContext {
   queryClient: QueryClient
@@ -65,6 +66,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               TanStackQueryDevtools,
             ]}
           /> */}
+          <Toaster closeButton />
         </PostHogProvider>
         <Scripts />
       </body>
