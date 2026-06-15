@@ -9,38 +9,200 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as SigninRouteRouteImport } from './routes/signin/route'
+import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardWalletRouteRouteImport } from './routes/dashboard/wallet/route'
+import { Route as DashboardSubmissionsRouteRouteImport } from './routes/dashboard/submissions/route'
+import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
+import { Route as DashboardOverviewRouteRouteImport } from './routes/dashboard/overview/route'
+import { Route as DashboardMessagesRouteRouteImport } from './routes/dashboard/messages/route'
+import { Route as DashboardCreatorsRouteRouteImport } from './routes/dashboard/creators/route'
+import { Route as DashboardContestBoardRouteRouteImport } from './routes/dashboard/contest-board/route'
+import { Route as DashboardCampaignsRouteRouteImport } from './routes/dashboard/campaigns/route'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRouteRoute = SigninRouteRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRouteRoute = RegisterRouteRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardWalletRouteRoute = DashboardWalletRouteRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSubmissionsRouteRoute =
+  DashboardSubmissionsRouteRouteImport.update({
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardSettingsRouteRoute = DashboardSettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardOverviewRouteRoute = DashboardOverviewRouteRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMessagesRouteRoute = DashboardMessagesRouteRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCreatorsRouteRoute = DashboardCreatorsRouteRouteImport.update({
+  id: '/creators',
+  path: '/creators',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardContestBoardRouteRoute =
+  DashboardContestBoardRouteRouteImport.update({
+    id: '/contest-board',
+    path: '/contest-board',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardCampaignsRouteRoute = DashboardCampaignsRouteRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/register': typeof RegisterRouteRoute
+  '/signin': typeof SigninRouteRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
+  '/dashboard/creators': typeof DashboardCreatorsRouteRoute
+  '/dashboard/messages': typeof DashboardMessagesRouteRoute
+  '/dashboard/overview': typeof DashboardOverviewRouteRoute
+  '/dashboard/settings': typeof DashboardSettingsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/wallet': typeof DashboardWalletRouteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/register': typeof RegisterRouteRoute
+  '/signin': typeof SigninRouteRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
+  '/dashboard/creators': typeof DashboardCreatorsRouteRoute
+  '/dashboard/messages': typeof DashboardMessagesRouteRoute
+  '/dashboard/overview': typeof DashboardOverviewRouteRoute
+  '/dashboard/settings': typeof DashboardSettingsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/wallet': typeof DashboardWalletRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/register': typeof RegisterRouteRoute
+  '/signin': typeof SigninRouteRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
+  '/dashboard/creators': typeof DashboardCreatorsRouteRoute
+  '/dashboard/messages': typeof DashboardMessagesRouteRoute
+  '/dashboard/overview': typeof DashboardOverviewRouteRoute
+  '/dashboard/settings': typeof DashboardSettingsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/wallet': typeof DashboardWalletRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/register'
+    | '/signin'
+    | '/dashboard'
+    | '/dashboard/campaigns'
+    | '/dashboard/contest-board'
+    | '/dashboard/creators'
+    | '/dashboard/messages'
+    | '/dashboard/overview'
+    | '/dashboard/settings'
+    | '/dashboard/submissions'
+    | '/dashboard/wallet'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/register'
+    | '/signin'
+    | '/dashboard'
+    | '/dashboard/campaigns'
+    | '/dashboard/contest-board'
+    | '/dashboard/creators'
+    | '/dashboard/messages'
+    | '/dashboard/overview'
+    | '/dashboard/settings'
+    | '/dashboard/submissions'
+    | '/dashboard/wallet'
+  id:
+    | '__root__'
+    | '/'
+    | '/register'
+    | '/signin'
+    | '/dashboard'
+    | '/dashboard/campaigns'
+    | '/dashboard/contest-board'
+    | '/dashboard/creators'
+    | '/dashboard/messages'
+    | '/dashboard/overview'
+    | '/dashboard/settings'
+    | '/dashboard/submissions'
+    | '/dashboard/wallet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RegisterRouteRoute: typeof RegisterRouteRoute
+  SigninRouteRoute: typeof SigninRouteRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +210,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/wallet': {
+      id: '/dashboard/wallet'
+      path: '/wallet'
+      fullPath: '/dashboard/wallet'
+      preLoaderRoute: typeof DashboardWalletRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/submissions': {
+      id: '/dashboard/submissions'
+      path: '/submissions'
+      fullPath: '/dashboard/submissions'
+      preLoaderRoute: typeof DashboardSubmissionsRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/overview': {
+      id: '/dashboard/overview'
+      path: '/overview'
+      fullPath: '/dashboard/overview'
+      preLoaderRoute: typeof DashboardOverviewRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/messages': {
+      id: '/dashboard/messages'
+      path: '/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof DashboardMessagesRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/creators': {
+      id: '/dashboard/creators'
+      path: '/creators'
+      fullPath: '/dashboard/creators'
+      preLoaderRoute: typeof DashboardCreatorsRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/contest-board': {
+      id: '/dashboard/contest-board'
+      path: '/contest-board'
+      fullPath: '/dashboard/contest-board'
+      preLoaderRoute: typeof DashboardContestBoardRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/campaigns': {
+      id: '/dashboard/campaigns'
+      path: '/campaigns'
+      fullPath: '/dashboard/campaigns'
+      preLoaderRoute: typeof DashboardCampaignsRouteRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardCampaignsRouteRoute: typeof DashboardCampaignsRouteRoute
+  DashboardContestBoardRouteRoute: typeof DashboardContestBoardRouteRoute
+  DashboardCreatorsRouteRoute: typeof DashboardCreatorsRouteRoute
+  DashboardMessagesRouteRoute: typeof DashboardMessagesRouteRoute
+  DashboardOverviewRouteRoute: typeof DashboardOverviewRouteRoute
+  DashboardSettingsRouteRoute: typeof DashboardSettingsRouteRoute
+  DashboardSubmissionsRouteRoute: typeof DashboardSubmissionsRouteRoute
+  DashboardWalletRouteRoute: typeof DashboardWalletRouteRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCampaignsRouteRoute: DashboardCampaignsRouteRoute,
+  DashboardContestBoardRouteRoute: DashboardContestBoardRouteRoute,
+  DashboardCreatorsRouteRoute: DashboardCreatorsRouteRoute,
+  DashboardMessagesRouteRoute: DashboardMessagesRouteRoute,
+  DashboardOverviewRouteRoute: DashboardOverviewRouteRoute,
+  DashboardSettingsRouteRoute: DashboardSettingsRouteRoute,
+  DashboardSubmissionsRouteRoute: DashboardSubmissionsRouteRoute,
+  DashboardWalletRouteRoute: DashboardWalletRouteRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RegisterRouteRoute: RegisterRouteRoute,
+  SigninRouteRoute: SigninRouteRoute,
+  DashboardRoute: DashboardRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

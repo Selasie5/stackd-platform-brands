@@ -3,22 +3,18 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import PostHogProvider from '../integrations/posthog/provider'
-
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
 
 import type { ApolloClientIntegration } from '@apollo/client-integration-tanstack-start'
+import { ApolloProvider } from '@apollo/client/react'
+import { apolloClient } from '../lib/apollo-client'
 
-import type { QueryClient } from '@tanstack/react-query'
+import { Toaster } from '../components/ui/sonner'
 
-interface MyRouterContext extends ApolloClientIntegration.RouterContext {
-  queryClient: QueryClient
-}
+interface MyRouterContext extends ApolloClientIntegration.RouterContext {}
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -52,19 +48,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <PostHogProvider>
-          {children}
-          {/* <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-              TanStackQueryDevtools,
-            ]}
-          /> */}
+          <ApolloProvider client={apolloClient}>
+            {children}
+            {/* <TanStackDevtools
+              config={{
+                position: 'bottom-right',
+              }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+                TanStackQueryDevtools,
+              ]}
+            /> */}
+            <Toaster closeButton />
+          </ApolloProvider>
         </PostHogProvider>
         <Scripts />
       </body>
