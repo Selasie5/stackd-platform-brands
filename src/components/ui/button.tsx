@@ -53,7 +53,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {...props}
         >
           {isLoading ? (
-            <SpleenetLoader size="sm" className="text-current shrink-0" />
+            <SpleenetLoader size="sm" className="shrink-0 text-current" />
           ) : (
             children
           )}
@@ -68,7 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading ? (
-          <SpleenetLoader size="sm" className="text-current shrink-0" />
+          <SpleenetLoader size="sm" className="shrink-0 text-current" />
         ) : (
           children
         )}

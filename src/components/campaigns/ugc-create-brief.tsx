@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import {
   AlertCircle,
   ChevronLeft,
@@ -15,43 +15,22 @@ import { TimePicker } from '@/components/ui/time-picker'
 import { Select } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { BriefField, BriefProse, BriefSection } from '@/components/campaigns/brief-field'
+import {
+  CPM_PLATFORM_OPTIONS,
+  USAGE_RIGHTS_OPTIONS,
+  VIDEO_TYPE_OPTIONS,
+  textareaClassName,
+} from '@/components/campaigns/campaign-constants'
+import { useCreateUgcOrder, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
+import { buildCreateUgcOrderInput } from '@/lib/opportunity-mappers'
 import { useWallet } from '@/contexts/wallet-context'
 import { cn } from '@/lib/utils'
-
-const VIDEO_TYPE_OPTIONS = [
-  { value: 'testimonial', label: 'Testimonial' },
-  { value: 'product-demo', label: 'Product demo' },
-  { value: 'unboxing', label: 'Unboxing' },
-  { value: 'tutorial', label: 'Tutorial' },
-  { value: 'lifestyle', label: 'Lifestyle' },
-  { value: 'other', label: 'Other' },
-]
+import { toast } from 'sonner'
 
 const PLATFORM_OPTIONS = [
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'youtube', label: 'YouTube' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'snapchat', label: 'Snapchat' },
+  ...CPM_PLATFORM_OPTIONS,
+  { value: 'any', label: 'Any platform' },
 ]
-
-const USAGE_RIGHTS_OPTIONS = [
-  {
-    id: 'organic',
-    title: 'Organic only',
-    description: 'Creator posts on their channel. Brand can repost organically.',
-  },
-  {
-    id: 'paid-ads',
-    title: 'Paid ads included',
-    description: 'Brand may run paid ads using the creator content for a defined period.',
-  },
-  {
-    id: 'full-buyout',
-    title: 'Full buyout',
-    description: 'Brand owns the content outright with unlimited usage across channels.',
-  },
-] as const
 
 type ReferenceLink = { id: string; label: string; url: string }
 
@@ -78,15 +57,13 @@ const FIELD_ID = {
   deadlineTime: 'ugc-deadline-time',
 } as const
 
-function textareaClassName(minHeight = 'min-h-[120px]') {
-  return cn(
-    minHeight,
-    'w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30'
-  )
-}
-
 export function UgcCreateBrief() {
+  const navigate = useNavigate()
   const { currency, currencySymbol, availableBalance, formatMoney } = useWallet()
+  const { saveUgcOrder, loading: saving } = useCreateUgcOrder()
+  const { submitForApproval, loading: submitting } = useSubmitOpportunityForApproval()
+  const [draftId, setDraftId] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<'draft' | 'publish' | null>(null)
   const [title, setTitle] = useState('')
   const [productName, setProductName] = useState('')
   const [shortDescription, setShortDescription] = useState('')
@@ -136,6 +113,72 @@ export function UgcCreateBrief() {
     setReferenceLinks((prev) => (prev.length <= 1 ? prev : prev.filter((item) => item.id !== id)))
   }
 
+  const buildInput = () =>
+    buildCreateUgcOrderInput({
+      title,
+      productName,
+      shortDescription,
+      fullDescription,
+      externalBriefLink,
+      videoType,
+      videoLengthSeconds,
+      creatorsNeeded,
+      flatRate,
+      wordsToSay,
+      wordsToAvoid,
+      callToAction,
+      requiredShots,
+      revisionLimit,
+      postingRequired,
+      targetPlatform,
+      productDeliveryDetails,
+      usageRights,
+      deadlineDate,
+      deadlineTime,
+      referenceLinks,
+      currency,
+    })
+
+  const handleSaveDraft = async () => {
+    setPendingAction('draft')
+    try {
+      const result = buildInput()
+      if ('error' in result) {
+        toast.error(result.error)
+        return
+      }
+      const saved = await saveUgcOrder(result.input, draftId ?? undefined)
+      if (!saved) return
+      setDraftId(saved.id)
+      toast.success('Campaign saved as draft.')
+      await navigate({ to: '/dashboard/campaigns' })
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
+  const handlePublish = async () => {
+    setPendingAction('publish')
+    try {
+      const result = buildInput()
+      if ('error' in result) {
+        toast.error(result.error)
+        return
+      }
+      const saved = await saveUgcOrder(result.input, draftId ?? undefined)
+      if (!saved) return
+      setDraftId(saved.id)
+      const submitted = await submitForApproval('UGC_ORDER', saved.id)
+      if (submitted) {
+        await navigate({ to: '/dashboard/campaigns' })
+      }
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
+  const isSaving = saving || submitting
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
       <Link
@@ -150,10 +193,7 @@ export function UgcCreateBrief() {
       <article className="min-w-0 flex-1 space-y-10 rounded-xl border border-zinc-200 bg-white px-6 py-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <header className="space-y-4 border-b border-zinc-100 pb-8">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-             Campaign | UGC
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
+            <h1 className="text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
               UGC Campaign Brief
             </h1>
             <BriefProse>
@@ -548,10 +588,21 @@ export function UgcCreateBrief() {
           )}
 
           <div className="space-y-2 pt-2">
-            <Button className="w-full" disabled={hasInsufficientFunds}>
+            <Button
+              className="w-full"
+              disabled={hasInsufficientFunds || isSaving}
+              isLoading={pendingAction === 'publish'}
+              onClick={() => void handlePublish()}
+            >
               Publish campaign
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={isSaving}
+              isLoading={pendingAction === 'draft'}
+              onClick={() => void handleSaveDraft()}
+            >
               Save as draft
             </Button>
           </div>

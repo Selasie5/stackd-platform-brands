@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Outlet, createFileRoute, Link, useLocation } from '@tanstack/react-router'
+import { Outlet, createFileRoute, Link, useLocation, useRouterState } from '@tanstack/react-router'
 import {
   LayoutDashboard,
   Megaphone,
@@ -42,6 +42,46 @@ const operationsNavItems = [
   { name: 'Messages', path: '/dashboard/messages', icon: MessageSquare },
 ]
 
+const CAMPAIGN_TYPE_BREADCRUMBS: Record<string, string> = {
+  UGC: 'UGC',
+  CPM: 'CPM Deal',
+  Contest: 'Contest',
+}
+
+function getCampaignCreateBreadcrumb(pathname: string, searchStr: string) {
+  if (pathname !== '/dashboard/campaigns') return null
+
+  const params = new URLSearchParams(searchStr)
+  if (params.get('action') !== 'create') return null
+
+  const campaignType = params.get('campaign_type')
+  if (campaignType && CAMPAIGN_TYPE_BREADCRUMBS[campaignType]) {
+    return CAMPAIGN_TYPE_BREADCRUMBS[campaignType]
+  }
+
+  return 'Create'
+}
+
+function getBreadcrumbs(pathname: string, searchStr: string) {
+  const parts = pathname.split('/').filter(Boolean)
+  const crumbs =
+    parts.length <= 1
+      ? ['Stackd', 'Overview']
+      : [
+          'Stackd',
+          ...parts.slice(1).map((part) =>
+            part.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+          ),
+        ]
+
+  const campaignCrumb = getCampaignCreateBreadcrumb(pathname, searchStr)
+  if (campaignCrumb) {
+    crumbs.push(campaignCrumb)
+  }
+
+  return crumbs
+}
+
 function NavItem({
   item,
   isCollapsed,
@@ -71,6 +111,7 @@ function DashboardLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
   const pathname = location.pathname
+  const searchStr = useRouterState({ select: (state) => state.location.searchStr })
   const { data: meData, loading: meLoading } = useMe()
   const { data: kycData, loading: kycLoading } = useMyKycApplication()
   const { logout } = useLogout()
@@ -99,21 +140,7 @@ function DashboardLayout() {
       .slice(0, 2)
   }
 
-  // Generate dynamic breadcrumbs based on the route path
-  const getBreadcrumbs = () => {
-    const parts = pathname.split('/').filter(Boolean)
-    if (parts.length <= 1) return ['Stackd', 'Overview']
-    return [
-      'Stackd',
-      ...parts.slice(1).map((part) =>
-        part
-          .replace(/-/g, ' ')
-          .replace(/\b\w/g, (char) => char.toUpperCase())
-      ),
-    ]
-  }
-
-  const breadcrumbs = getBreadcrumbs()
+  const breadcrumbs = getBreadcrumbs(pathname, searchStr)
 
   return (
     <WalletProvider
@@ -247,7 +274,12 @@ function DashboardLayout() {
           <div className="flex items-center gap-2 text-[12px] font-normal text-zinc-400 dark:text-zinc-500">
             {breadcrumbs.map((crumb, idx) => (
               <React.Fragment key={idx}>
-                {idx > 0 && <span className="text-zinc-300 dark:text-zinc-700">/</span>}
+                {idx > 0 && (
+                  <ChevronRight
+                    className="h-3.5 w-3.5 shrink-0 text-zinc-300 dark:text-zinc-700"
+                    aria-hidden="true"
+                  />
+                )}
                 <span
                   className={
                     idx === breadcrumbs.length - 1

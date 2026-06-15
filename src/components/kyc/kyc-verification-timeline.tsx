@@ -5,10 +5,10 @@ import {
   Circle,
   Clock3,
   FileWarning,
-  LoaderCircle,
   ShieldCheck,
 } from 'lucide-react'
 import { SubmittedDocumentRow } from '@/components/kyc/document-upload-slot'
+import { SpleenetLoader } from '@/components/ui/spleenet-loader'
 import type { KycApplication } from '@/hooks/use-kyc'
 import {
   KYC_STATUS_DESCRIPTIONS,
@@ -132,7 +132,7 @@ function StepIndicator({ state, icon: Icon }: { state: TimelineStepState; icon: 
       )}
     >
       {state === 'current' ? (
-        <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+        <SpleenetLoader size="xs" tone="amber" label="In progress" />
       ) : state === 'upcoming' ? (
         <Circle className="h-3 w-3" />
       ) : (
