@@ -15,6 +15,7 @@ export function getStoredDeviceToken() {
 }
 
 export function setStoredDeviceToken(token: string) {
+  if (typeof localStorage === 'undefined') return
   localStorage.setItem(DEVICE_TOKEN_STORAGE_KEY, token)
 }
 

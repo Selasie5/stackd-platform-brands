@@ -27,6 +27,28 @@ interface DocumentUploadSlotProps {
   className?: string
 }
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+])
+
+function isAllowedUpload(file: File, accept: string) {
+  const extension = `.${file.name.split('.').pop()?.toLowerCase() ?? ''}`
+  const acceptedExtensions = accept
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+
+  const matchesExtension =
+    acceptedExtensions.length === 0 || acceptedExtensions.includes(extension)
+  const matchesMime = ALLOWED_MIME_TYPES.has(file.type)
+
+  return matchesExtension && matchesMime
+}
+
 export function DocumentUploadSlot({
   label,
   description,
@@ -48,6 +70,16 @@ export function DocumentUploadSlot({
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast.error('File must be 10MB or less.')
+      return
+    }
+
+    if (!isAllowedUpload(file, accept)) {
+      toast.error('Only PDF, PNG, JPG, or WEBP files are allowed.')
+      return
+    }
 
     try {
       setIsUploading(true)

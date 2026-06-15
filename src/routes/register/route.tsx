@@ -39,6 +39,8 @@ const INDUSTRIES = [
 
 
 
+const MAX_LOGO_SIZE_BYTES = 10 * 1024 * 1024
+
 function RegisterRoute() {
   const { step = 1 } = Route.useSearch()
   const navigate = useNavigate()
@@ -60,6 +62,16 @@ function RegisterRoute() {
   })
 
   const [logoFile, setLogoFile] = React.useState<File | null>(null)
+  const [logoError, setLogoError] = React.useState('')
+  const logoBlobUrlRef = React.useRef<string | null>(null)
+
+  React.useEffect(() => {
+    return () => {
+      if (logoBlobUrlRef.current) {
+        URL.revokeObjectURL(logoBlobUrlRef.current)
+      }
+    }
+  }, [])
 
   const { registerBrand, loading: isSubmitting } = useRegisterBrand()
   const [isUploading, setIsUploading] = React.useState(false)
@@ -87,10 +99,24 @@ function RegisterRoute() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setLogoFile(file)
-      setFormData((prev) => ({ ...prev, logoUrl: URL.createObjectURL(file) }))
+    if (!file) return
+
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      setLogoError('Logo must be 10MB or less.')
+      e.target.value = ''
+      return
     }
+
+    setLogoError('')
+
+    if (logoBlobUrlRef.current) {
+      URL.revokeObjectURL(logoBlobUrlRef.current)
+    }
+
+    const blobUrl = URL.createObjectURL(file)
+    logoBlobUrlRef.current = blobUrl
+    setLogoFile(file)
+    setFormData((prev) => ({ ...prev, logoUrl: blobUrl }))
   }
 
   const triggerFileUpload = () => {
@@ -264,6 +290,9 @@ function RegisterRoute() {
                     Upload
                   </Button>
                   <p className="text-[10px] text-zinc-400">Recommended size 1:1, up to 10MB.</p>
+                  {logoError && (
+                    <p className="text-[10px] text-red-600">{logoError}</p>
+                  )}
                 </div>
               </div>
             </div>

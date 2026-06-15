@@ -15,6 +15,10 @@ export async function uploadToCloudinary(file: File): Promise<string> {
     throw new Error('Failed to upload file')
   }
 
-  const result = (await response.json()) as { secure_url: string }
+  const result = (await response.json()) as { secure_url?: unknown }
+  if (typeof result.secure_url !== 'string' || result.secure_url.trim() === '') {
+    throw new Error('Upload succeeded but no file URL was returned')
+  }
+
   return result.secure_url
 }

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client/react'
+import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import {
@@ -113,7 +113,7 @@ export function useRegisterBrand() {
         toast.success(data.registerBrand.message)
         navigate({
           to: '/signin',
-          search: { action: 'verify-email' },
+          search: { action: 'verify-email', email: input.email },
         })
       }
     } catch (err) {
@@ -126,11 +126,13 @@ export function useRegisterBrand() {
 
 export function useLogout() {
   const navigate = useNavigate()
+  const client = useApolloClient()
   const [logoutMutation, { loading }] = useMutation(LOGOUT_MUTATION)
 
   const logout = async () => {
     try {
       await logoutMutation()
+      await client.clearStore()
       toast.success('Signed out successfully.')
       navigate({ to: '/signin' })
     } catch (err) {

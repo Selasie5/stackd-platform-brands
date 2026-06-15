@@ -12,7 +12,7 @@ import type { ApolloClientIntegration } from '@apollo/client-integration-tanstac
 import { ApolloProvider } from '@apollo/client/react'
 import { apolloClient } from '../lib/apollo-client'
 
-import { Toaster } from 'sonner'
+import { Toaster } from '../components/ui/sonner'
 
 interface MyRouterContext extends ApolloClientIntegration.RouterContext {}
 

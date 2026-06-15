@@ -29,24 +29,23 @@ export function BriefField({
   required,
   children,
   className,
+  id,
 }: {
   label: string
   hint?: string
   required?: boolean
   children: ReactNode
   className?: string
+  id?: string
 }) {
   return (
     <div className={cn('space-y-2', className)}>
-      <div>
-        <p className="text-sm font-medium text-zinc-800">
-          {label}
-          {required && <span className="ml-0.5 text-red-500">*</span>}
-        </p>
-      </div>
+      <label htmlFor={id} className="block text-sm font-medium text-zinc-800">
+        {label}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
+      </label>
       {children}
       {hint && <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{hint}</p>}
-
     </div>
   )
 }

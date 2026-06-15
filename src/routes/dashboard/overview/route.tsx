@@ -242,10 +242,22 @@ function DashboardCard({
               {action}
             </button>
           )}
-          <button className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 text-zinc-400 hover:bg-zinc-50 hover:text-zinc-700">
-            <Maximize2 className="h-3.5 w-3.5" />
-            <MoreHorizontal className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              aria-label="Expand widget"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-400 hover:bg-zinc-50 hover:text-zinc-700"
+            >
+              <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label="More options"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-400 hover:bg-zinc-50 hover:text-zinc-700"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
       {children}

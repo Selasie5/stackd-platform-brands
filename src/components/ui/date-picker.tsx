@@ -24,6 +24,7 @@ export interface DatePickerProps {
   disabled?: boolean
   className?: string
   fromDate?: Date
+  id?: string
 }
 
 export function DatePicker({
@@ -33,6 +34,7 @@ export function DatePicker({
   disabled = false,
   className,
   fromDate,
+  id,
 }: DatePickerProps) {
   const selectedDate = parseDateValue(value)
 
@@ -41,6 +43,7 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
+          id={id}
           disabled={disabled}
           className={cn(
             'flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-left text-base transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30',

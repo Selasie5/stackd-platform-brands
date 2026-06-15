@@ -19,7 +19,7 @@ import {
 import type { KycStatus } from '@/lib/kyc'
 import { cn } from '@/lib/utils'
 
-type TimelineStepState = 'complete' | 'current' | 'upcoming' | 'error'
+type TimelineStepState = 'complete' | 'current' | 'pending' | 'upcoming' | 'error'
 
 interface TimelineStep {
   id: string
@@ -106,7 +106,7 @@ function buildTimelineSteps(
           ? application.adminNote
           : KYC_STATUS_DESCRIPTIONS.needs_more_info,
         date: application.reviewedAt,
-        state: 'current',
+        state: 'pending',
         icon: FileWarning,
       },
     ]
@@ -119,6 +119,7 @@ function StepIndicator({ state, icon: Icon }: { state: TimelineStepState; icon: 
   const styles: Record<TimelineStepState, string> = {
     complete: 'border-emerald-200 bg-emerald-50 text-emerald-600',
     current: 'border-amber-200 bg-amber-50 text-amber-600',
+    pending: 'border-orange-200 bg-orange-50 text-orange-600',
     upcoming: 'border-zinc-200 bg-zinc-50 text-zinc-400',
     error: 'border-red-200 bg-red-50 text-red-600',
   }
@@ -173,7 +174,7 @@ function TimelineStepRow({
       <div className={cn('min-w-0', isLast ? 'pb-0' : 'pb-6')}>
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-sm font-semibold text-zinc-900">{step.title}</h3>
-          {step.state === 'current' && (
+          {(step.state === 'current' || step.state === 'pending') && (
             <span
               className={cn(
                 'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset',

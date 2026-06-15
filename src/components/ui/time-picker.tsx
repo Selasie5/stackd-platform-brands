@@ -86,6 +86,7 @@ export interface TimePickerProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  id?: string
 }
 
 export function TimePicker({
@@ -94,6 +95,7 @@ export function TimePicker({
   placeholder = 'Pick a time',
   disabled = false,
   className,
+  id,
 }: TimePickerProps) {
   const parsed = useMemo(() => parseTimeValue(value), [value])
   const hour = parsed?.hour ?? 12
@@ -108,6 +110,7 @@ export function TimePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
+          id={id}
           disabled={disabled}
           className={cn(
             'flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-left text-base transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30',

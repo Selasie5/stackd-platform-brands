@@ -2,7 +2,8 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@/lib/utils"
+import { cn } from "#/lib/utils"
+import { SpleenetLoader } from "./spleenet-loader"
 
 const buttonVariants = cva(
   "inline-flex w-fit min-w-fit shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
@@ -34,8 +35,6 @@ const buttonVariants = cva(
   }
 )
 
-import { SpleenetLoader } from "./spleenet-loader"
-
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
@@ -46,16 +45,19 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, isLoading = false, children, disabled, ...props }, ref) => {
     if (asChild) {
-      const SlotComponent = Slot as any
       return (
-        <SlotComponent
+        <Slot
           className={cn(buttonVariants({ variant, size, className }))}
           ref={ref}
           disabled={disabled || isLoading}
           {...props}
         >
-          {children}
-        </SlotComponent>
+          {isLoading ? (
+            <SpleenetLoader size="sm" className="text-current shrink-0" />
+          ) : (
+            children
+          )}
+        </Slot>
       )
     }
     return (

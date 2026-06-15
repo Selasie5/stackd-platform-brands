@@ -15,6 +15,7 @@ import {
 
 const searchSchema = z.object({
   action: z.enum(['forgot-password', 'check-email', 'reset-password', 'verify-email']).optional(),
+  email: z.email().optional(),
 })
 
 export const Route = createFileRoute('/signin')({
@@ -23,47 +24,54 @@ export const Route = createFileRoute('/signin')({
 })
 
 function SignInRoute() {
-  const { action } = Route.useSearch()
+  const { action, email: emailFromSearch } = Route.useSearch()
   const navigate = useNavigate()
 
-
-  const [email, setEmail] = React.useState('')
+  const [email, setEmail] = React.useState(emailFromSearch ?? '')
   const [password, setPassword] = React.useState('')
   const [newPassword, setNewPassword] = React.useState('')
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [otp, setOtp] = React.useState(['', '', '', '', '', ''])
+  const [otpError, setOtpError] = React.useState('')
+  const [passwordError, setPasswordError] = React.useState('')
+  const otpInputRefs = React.useRef<Array<HTMLInputElement | null>>([])
 
   const { login, loading: loginLoading } = useLogin()
   const { requestReset, loading: resetRequestLoading } = useRequestPasswordReset()
   const { resetPassword, loading: resetLoading } = useResetPassword()
   const { resendEmail, loading: resendLoading } = useResendVerificationEmail()
 
-
   const setAction = (newAction: typeof action) => {
     navigate({
       to: '/signin',
-      search: { action: newAction },
+      search: {
+        action: newAction,
+        ...(email ? { email } : {}),
+      },
     })
   }
 
+  React.useEffect(() => {
+    if (emailFromSearch) {
+      setEmail(emailFromSearch)
+    }
+  }, [emailFromSearch])
 
   const handleOtpChange = (value: string, index: number) => {
     if (value.length > 1) value = value.slice(-1)
     const newOtp = [...otp]
     newOtp[index] = value
     setOtp(newOtp)
-
+    setOtpError('')
 
     if (value !== '' && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`)
-      nextInput?.focus()
+      otpInputRefs.current[index + 1]?.focus()
     }
   }
 
   const handleOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === 'Backspace' && otp[index] === '' && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`)
-      prevInput?.focus()
+      otpInputRefs.current[index - 1]?.focus()
     }
   }
 
@@ -80,11 +88,22 @@ function SignInRoute() {
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (otp.some((digit) => digit === '')) {
+      setOtpError('Enter the full 6-digit verification code.')
+      return
+    }
+    setOtpError('')
     setAction('reset-password')
   }
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.')
+      return
+    }
+    setPasswordError('')
+
     const otpCode = otp.join('')
     const success = await resetPassword(email, otpCode, newPassword)
     if (success) setAction(undefined)
@@ -93,6 +112,10 @@ function SignInRoute() {
   const handleResendVerification = async (e: React.FormEvent) => {
     e.preventDefault()
     await resendEmail(email)
+  }
+
+  const handleResendResetCode = async () => {
+    await requestReset(email)
   }
 
   switch (action) {
@@ -136,10 +159,13 @@ function SignInRoute() {
           topRightLinkTo="/signin"
         >
           <form className="space-y-6" onSubmit={handleVerifyOtp}>
-            <div className="flex justify-between items-center max-w-[360px] mx-auto py-4">
+            <div className="flex max-w-[360px] mx-auto items-center justify-between py-4">
               {otp.map((digit, index) => (
                 <input
                   key={index}
+                  ref={(element) => {
+                    otpInputRefs.current[index] = element
+                  }}
                   id={`otp-${index}`}
                   type="text"
                   inputMode="numeric"
@@ -148,19 +174,22 @@ function SignInRoute() {
                   value={digit}
                   onChange={(e) => handleOtpChange(e.target.value, index)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className="w-12 h-14 text-center text-xl font-bold bg-transparent border border-zinc-200 dark:border-zinc-800 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  className="h-14 w-12 rounded-xl border border-zinc-200 bg-transparent text-center text-xl font-bold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-zinc-800"
                   required
                 />
               ))}
             </div>
-            <div className="pt-2 space-y-4 text-center">
-              <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl">
+            {otpError && (
+              <p className="text-center text-xs text-red-600">{otpError}</p>
+            )}
+            <div className="space-y-4 pt-2 text-center">
+              <Button type="submit" className="w-full rounded-xl py-6 text-base font-semibold">
                 Verify code
               </Button>
               <button
                 type="button"
-                onClick={() => console.log('Resending code')}
-                className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline underline-offset-4 transition-colors"
+                onClick={handleResendResetCode}
+                className="text-xs font-semibold text-zinc-500 underline underline-offset-4 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
               >
                 Resend verification code?
               </button>
@@ -184,7 +213,10 @@ function SignInRoute() {
               <PasswordInput
                 id="newPassword"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  setNewPassword(e.target.value)
+                  setPasswordError('')
+                }}
                 className="border-zinc-200 dark:border-zinc-800"
                 required
               />
@@ -194,11 +226,17 @@ function SignInRoute() {
               <PasswordInput
                 id="confirmPassword"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value)
+                  setPasswordError('')
+                }}
                 className="border-zinc-200 dark:border-zinc-800"
                 required
               />
             </div>
+            {passwordError && (
+              <p className="text-xs text-red-600">{passwordError}</p>
+            )}
             <div className="pt-2">
               <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={resetLoading}>
                 Reset password
@@ -219,14 +257,14 @@ function SignInRoute() {
           topRightLinkTo="/signin"
         >
           <form className="space-y-6" onSubmit={handleResendVerification}>
-            <div className="pt-4 space-y-4 text-center">
+            <div className="space-y-4 pt-4 text-center">
               <Button type="submit" className="w-full py-6 text-base font-semibold rounded-xl" isLoading={resendLoading}>
                 Resend verification email
               </Button>
               <div>
                 <Link
                   to="/signin"
-                  className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline underline-offset-4 transition-colors"
+                  className="text-xs font-semibold text-zinc-500 underline underline-offset-4 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
                 >
                   I've verified my email.
                 </Link>
@@ -263,7 +301,7 @@ function SignInRoute() {
                 <button
                   type="button"
                   onClick={() => setAction('forgot-password')}
-                  className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 underline underline-offset-4 transition-colors"
+                  className="text-xs font-semibold text-zinc-500 underline underline-offset-4 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
                 >
                   Forgot password?
                 </button>

@@ -254,6 +254,8 @@ function SettingsRow({
 function formatKycStatusLabel(status?: string | null | KycStatus) {
   if (!status) return KYC_STATUS_LABELS.not_started
   const normalized = String(status).toLowerCase() as KycStatus
-  if (normalized in KYC_STATUS_LABELS) return KYC_STATUS_LABELS[normalized]
+  if (Object.prototype.hasOwnProperty.call(KYC_STATUS_LABELS, normalized)) {
+    return KYC_STATUS_LABELS[normalized]
+  }
   return String(status).replace(/_/g, ' ')
 }

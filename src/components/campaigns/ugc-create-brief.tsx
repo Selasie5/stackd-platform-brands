@@ -55,6 +55,29 @@ const USAGE_RIGHTS_OPTIONS = [
 
 type ReferenceLink = { id: string; label: string; url: string }
 
+const FIELD_ID = {
+  title: 'ugc-campaign-title',
+  productName: 'ugc-product-name',
+  shortDescription: 'ugc-short-description',
+  fullDescription: 'ugc-full-description',
+  coverImage: 'ugc-cover-image',
+  externalBriefLink: 'ugc-external-brief-link',
+  videoType: 'ugc-video-type',
+  videoLength: 'ugc-video-length',
+  creatorsNeeded: 'ugc-creators-needed',
+  flatRate: 'ugc-flat-rate',
+  wordsToSay: 'ugc-words-to-say',
+  wordsToAvoid: 'ugc-words-to-avoid',
+  callToAction: 'ugc-call-to-action',
+  requiredShots: 'ugc-required-shots',
+  revisionLimit: 'ugc-revision-limit',
+  postingRequired: 'ugc-posting-required',
+  targetPlatform: 'ugc-target-platform',
+  productDeliveryDetails: 'ugc-product-delivery-details',
+  deadlineDate: 'ugc-deadline-date',
+  deadlineTime: 'ugc-deadline-time',
+} as const
+
 function textareaClassName(minHeight = 'min-h-[120px]') {
   return cn(
     minHeight,
@@ -145,16 +168,18 @@ export function UgcCreateBrief() {
           title="Basics"
           description="Introduce the campaign and what you're asking creators to produce."
         >
-          <BriefField label="Campaign title" required hint="A clear name creators will recognize.">
+          <BriefField id={FIELD_ID.title} label="Campaign title" required hint="A clear name creators will recognize.">
             <Input
+              id={FIELD_ID.title}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Summer launch testimonial series"
             />
           </BriefField>
 
-          <BriefField label="Product or service name" required>
+          <BriefField id={FIELD_ID.productName} label="Product or service name" required>
             <Input
+              id={FIELD_ID.productName}
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               placeholder="Stackd Pro Analytics"
@@ -162,11 +187,13 @@ export function UgcCreateBrief() {
           </BriefField>
 
           <BriefField
+            id={FIELD_ID.shortDescription}
             label="Short description"
             required
             hint="One-line summary shown in campaign listings. 500 characters max."
           >
             <textarea
+              id={FIELD_ID.shortDescription}
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value.slice(0, 500))}
               placeholder="We're looking for authentic testimonials from brands using our analytics dashboard."
@@ -177,11 +204,13 @@ export function UgcCreateBrief() {
           </BriefField>
 
           <BriefField
+            id={FIELD_ID.fullDescription}
             label="Full campaign description"
             required
             hint="The main narrative of your brief. Explain context, goals, and creative direction."
           >
             <textarea
+              id={FIELD_ID.fullDescription}
               value={fullDescription}
               onChange={(e) => setFullDescription(e.target.value)}
               placeholder="Tell creators about your brand story, the product experience you want highlighted, and the tone you're going for..."
@@ -193,13 +222,17 @@ export function UgcCreateBrief() {
             label="Cover image"
             hint="Optional hero image for the campaign listing."
           >
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 px-4 py-8 transition-colors hover:border-primary/40 hover:bg-blue-50/30">
+            <label
+              htmlFor={FIELD_ID.coverImage}
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 px-4 py-8 transition-colors hover:border-primary/40 hover:bg-blue-50/30"
+            >
               <Upload className="h-5 w-5 text-zinc-400" />
               <span className="text-sm font-medium text-zinc-700">
                 {coverImageName ?? 'Upload cover image'}
               </span>
               <span className="text-xs text-zinc-400">PNG or JPG, up to 5MB</span>
               <input
+                id={FIELD_ID.coverImage}
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 className="sr-only"
@@ -208,10 +241,11 @@ export function UgcCreateBrief() {
             </label>
           </BriefField>
 
-          <BriefField label="External brief link" hint="Optional link to a Notion doc, PDF, or mood board.">
+          <BriefField id={FIELD_ID.externalBriefLink} label="External brief link" hint="Optional link to a Notion doc, PDF, or mood board.">
             <div className="relative">
               <Link2 className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <Input
+                id={FIELD_ID.externalBriefLink}
                 value={externalBriefLink}
                 onChange={(e) => setExternalBriefLink(e.target.value)}
                 placeholder="https://"
@@ -226,8 +260,9 @@ export function UgcCreateBrief() {
           description="Define the deliverable specs and creative constraints for each creator."
         >
           <div className="grid gap-6 sm:grid-cols-2">
-            <BriefField label="Video type" required>
+            <BriefField id={FIELD_ID.videoType} label="Video type" required>
               <Select
+                id={FIELD_ID.videoType}
                 value={videoType}
                 onChange={setVideoType}
                 options={VIDEO_TYPE_OPTIONS}
@@ -235,8 +270,9 @@ export function UgcCreateBrief() {
               />
             </BriefField>
 
-            <BriefField label="Video length (seconds)" required hint="Min 15, max 180.">
+            <BriefField id={FIELD_ID.videoLength} label="Video length (seconds)" required hint="Min 15, max 180.">
               <Input
+                id={FIELD_ID.videoLength}
                 type="number"
                 min={15}
                 max={180}
@@ -246,8 +282,9 @@ export function UgcCreateBrief() {
               />
             </BriefField>
 
-            <BriefField label="Number of creators needed" required>
+            <BriefField id={FIELD_ID.creatorsNeeded} label="Number of creators needed" required>
               <Input
+                id={FIELD_ID.creatorsNeeded}
                 type="number"
                 min={1}
                 value={creatorsNeeded}
@@ -256,6 +293,7 @@ export function UgcCreateBrief() {
             </BriefField>
 
             <BriefField
+              id={FIELD_ID.flatRate}
               label="Flat rate per creator"
               required
               hint={`Currency: ${currency} (from wallet).`}
@@ -265,6 +303,7 @@ export function UgcCreateBrief() {
                   {currencySymbol}
                 </span>
                 <Input
+                  id={FIELD_ID.flatRate}
                   type="number"
                   min={0}
                   value={flatRate}
@@ -276,8 +315,9 @@ export function UgcCreateBrief() {
             </BriefField>
           </div>
 
-          <BriefField label="Words to say" hint="Key phrases or talking points creators should include.">
+          <BriefField id={FIELD_ID.wordsToSay} label="Words to say" hint="Key phrases or talking points creators should include.">
             <textarea
+              id={FIELD_ID.wordsToSay}
               value={wordsToSay}
               onChange={(e) => setWordsToSay(e.target.value)}
               placeholder="Mention our free trial, highlight ease of setup, reference the mobile app..."
@@ -285,8 +325,9 @@ export function UgcCreateBrief() {
             />
           </BriefField>
 
-          <BriefField label="Words to avoid" hint="Terms, claims, or competitor names to stay away from.">
+          <BriefField id={FIELD_ID.wordsToAvoid} label="Words to avoid" hint="Terms, claims, or competitor names to stay away from.">
             <textarea
+              id={FIELD_ID.wordsToAvoid}
               value={wordsToAvoid}
               onChange={(e) => setWordsToAvoid(e.target.value)}
               placeholder="Do not mention competitors by name. Avoid guaranteed ROI claims."
@@ -294,16 +335,18 @@ export function UgcCreateBrief() {
             />
           </BriefField>
 
-          <BriefField label="Call to action" required hint="What should viewers do after watching?">
+          <BriefField id={FIELD_ID.callToAction} label="Call to action" required hint="What should viewers do after watching?">
             <Input
+              id={FIELD_ID.callToAction}
               value={callToAction}
               onChange={(e) => setCallToAction(e.target.value)}
               placeholder="Visit stackd.com and start your free trial"
             />
           </BriefField>
 
-          <BriefField label="Required shots" hint="List specific scenes, angles, or B-roll you need.">
+          <BriefField id={FIELD_ID.requiredShots} label="Required shots" hint="List specific scenes, angles, or B-roll you need.">
             <textarea
+              id={FIELD_ID.requiredShots}
               value={requiredShots}
               onChange={(e) => setRequiredShots(e.target.value)}
               placeholder="Opening hook with product on desk, screen recording of dashboard, closing CTA with logo..."
@@ -312,8 +355,9 @@ export function UgcCreateBrief() {
           </BriefField>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <BriefField label="Revision limit" required hint="Maximum 3 revisions per creator.">
+            <BriefField id={FIELD_ID.revisionLimit} label="Revision limit" required hint="Maximum 3 revisions per creator.">
               <Select
+                id={FIELD_ID.revisionLimit}
                 value={revisionLimit}
                 onChange={setRevisionLimit}
                 options={[
@@ -325,20 +369,22 @@ export function UgcCreateBrief() {
               />
             </BriefField>
 
-            <BriefField label="Posting required">
-              <label className="flex h-9 cursor-pointer items-center gap-2.5 rounded-md border border-input px-3 text-sm dark:bg-input/30">
+            <BriefField id={FIELD_ID.postingRequired} label="Posting required">
+              <div className="flex h-9 cursor-pointer items-center gap-2.5 rounded-md border border-input px-3 text-sm dark:bg-input/30">
                 <Checkbox
+                  id={FIELD_ID.postingRequired}
                   checked={postingRequired}
                   onCheckedChange={(checked) => setPostingRequired(checked === true)}
                 />
                 <span className="text-zinc-700">Creator must post on their channel</span>
-              </label>
+              </div>
             </BriefField>
           </div>
 
           {postingRequired && (
-            <BriefField label="Target platform" required>
+            <BriefField id={FIELD_ID.targetPlatform} label="Target platform" required>
               <Select
+                id={FIELD_ID.targetPlatform}
                 value={targetPlatform}
                 onChange={setTargetPlatform}
                 options={PLATFORM_OPTIONS}
@@ -378,8 +424,9 @@ export function UgcCreateBrief() {
                     className="shrink-0"
                     onClick={() => removeReferenceLink(link.id)}
                     disabled={referenceLinks.length <= 1}
+                    aria-label="Remove reference link"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
               ))}
@@ -391,11 +438,13 @@ export function UgcCreateBrief() {
           </BriefField>
 
           <BriefField
+            id={FIELD_ID.productDeliveryDetails}
             label="Product delivery details"
             required
             hint="Explain how the product or access reaches the creator."
           >
             <textarea
+              id={FIELD_ID.productDeliveryDetails}
               value={productDeliveryDetails}
               onChange={(e) => setProductDeliveryDetails(e.target.value)}
               placeholder="We'll ship the product within 3 business days. Include your shipping address after acceptance. Digital access codes sent via email."
@@ -416,6 +465,7 @@ export function UgcCreateBrief() {
                   <button
                     key={option.id}
                     type="button"
+                    aria-pressed={selected}
                     onClick={() => setUsageRights(option.id)}
                     className={cn(
                       'rounded-lg border px-4 py-3 text-left transition-all',
@@ -435,12 +485,14 @@ export function UgcCreateBrief() {
           <BriefField label="Deadline" required hint="When creators must deliver final content.">
             <div className="grid gap-3 sm:grid-cols-2">
               <DatePicker
+                id={FIELD_ID.deadlineDate}
                 value={deadlineDate}
                 onChange={setDeadlineDate}
                 placeholder="Select date"
                 fromDate={new Date()}
               />
               <TimePicker
+                id={FIELD_ID.deadlineTime}
                 value={deadlineTime}
                 onChange={setDeadlineTime}
                 placeholder="Select time"
