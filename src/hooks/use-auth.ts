@@ -9,7 +9,9 @@ import {
   REQUEST_PASSWORD_RESET_MUTATION,
   RESET_PASSWORD_MUTATION,
   RESEND_VERIFICATION_EMAIL_MUTATION,
+  REGISTER_DEVICE_TOKEN_MUTATION,
 } from '@/graphql/auth'
+import { registerStoredDeviceToken } from '@/lib/device-token'
 
 
 
@@ -60,13 +62,13 @@ interface RegisterData {
 
 
 function extractGqlError(error: unknown): string {
-  if (!error) return 'An unexpected error occurred.'
-  if (typeof error === 'object' && error !== null && 'graphQLErrors' in error) {
+  if (!error || typeof error !== 'object') return 'An unexpected error occurred.'
+  if ('graphQLErrors' in error) {
     const gqlErrors = (error as { graphQLErrors: Array<{ message: string }> }).graphQLErrors
     if (gqlErrors.length > 0) return gqlErrors[0].message
   }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    return (error as { message: string }).message
+  if ('message' in error && typeof error.message === 'string') {
+    return error.message
   }
   return 'An unexpected error occurred.'
 }
@@ -81,12 +83,14 @@ export function useMe() {
 
 export function useLogin() {
   const navigate = useNavigate()
+  const { registerDeviceToken } = useRegisterDeviceToken()
   const [loginMutation, { loading, error }] = useMutation<LoginData, { input: LoginInput }>(LOGIN_MUTATION)
 
   const login = async (input: LoginInput) => {
     try {
       const { data } = await loginMutation({ variables: { input } })
-      if (data?.login?.user) {
+      if (data?.login.user) {
+        void registerStoredDeviceToken(registerDeviceToken)
         toast.success('Welcome back!')
         navigate({ to: '/dashboard/overview' })
       }
@@ -105,7 +109,7 @@ export function useRegisterBrand() {
   const registerBrand = async (input: RegisterBrandInput) => {
     try {
       const { data } = await registerMutation({ variables: { input } })
-      if (data?.registerBrand?.message) {
+      if (data?.registerBrand.message) {
         toast.success(data.registerBrand.message)
         navigate({
           to: '/signin',
@@ -186,6 +190,24 @@ export function useResendVerificationEmail() {
   }
 
   return { resendEmail, loading, error }
+}
+
+export function useRegisterDeviceToken() {
+  const [registerDeviceTokenMutation] = useMutation<
+    { registerDeviceToken: boolean },
+    { token: string; platform: string }
+  >(REGISTER_DEVICE_TOKEN_MUTATION)
+
+  const registerDeviceToken = async (token: string, platform: string) => {
+    try {
+      await registerDeviceTokenMutation({ variables: { token, platform } })
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  return { registerDeviceToken }
 }
 
 export type { User, RegisterBrandInput, LoginInput }

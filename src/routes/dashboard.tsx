@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Outlet, createFileRoute, Link, useLocation } from '@tanstack/react-router'
 import {
   LayoutDashboard,
@@ -14,11 +14,16 @@ import {
   PanelLeft,
   ChevronsUpDown,
   ChevronRight,
-  Rocket,
 } from 'lucide-react'
+import { KycDashboardBanner } from '@/components/kyc/kyc-dashboard-banner'
+import { DeviceTokenSync } from '@/components/auth/device-token-sync'
 import { CreateCampaignButton } from '@/components/create-campaign-button'
-import { Button } from '@/components/ui/button'
+import { WalletProvider } from '@/contexts/wallet-context'
 import { useMe, useLogout } from '@/hooks/use-auth'
+import { useMyKycApplication } from '@/hooks/use-kyc'
+import { isKycComplete, resolveEffectiveKycStatus } from '@/lib/kyc'
+import type { KycStatus } from '@/lib/kyc'
+import type { KycApplication } from '@/hooks/use-kyc'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardLayout,
@@ -67,14 +72,22 @@ function DashboardLayout() {
   const location = useLocation()
   const pathname = location.pathname
   const { data: meData, loading: meLoading } = useMe()
+  const { data: kycData, loading: kycLoading } = useMyKycApplication()
   const { logout } = useLogout()
 
   const user = meData?.me
   const brandName = user?.brand?.brandName ?? 'Brand'
   const userEmail = user?.email ?? ''
-  const kycStatus = user?.brand?.kycStatus
+  const kycApplication = kycData?.myKycApplication
+  const effectiveKycStatus = resolveEffectiveKycStatus(
+    user?.brand?.kycStatus,
+    kycApplication?.status
+  )
   const shouldShowKycBanner =
-    !meLoading && Boolean(user?.brand) && !isKycComplete(kycStatus)
+    !meLoading &&
+    !kycLoading &&
+    Boolean(user?.brand) &&
+    !isKycComplete(effectiveKycStatus)
 
   // Generate initials from brand name
   const getInitials = (name: string) => {
@@ -103,11 +116,21 @@ function DashboardLayout() {
   const breadcrumbs = getBreadcrumbs()
 
   return (
-    <div className="flex h-screen w-full bg-[#F4F6F8] dark:bg-zinc-950 font-sans overflow-hidden">
+    <WalletProvider
+      skip={
+        meLoading ||
+        kycLoading ||
+        !user?.brand ||
+        !isKycComplete(effectiveKycStatus)
+      }
+    >
+      <DeviceTokenSync />
+      <div className="fixed inset-0 flex overflow-hidden bg-[#F4F6F8] font-sans dark:bg-zinc-950">
       {/* Sidebar */}
       <aside
-        className={`${isCollapsed ? 'w-16' : 'w-64'
-          } shrink-0 flex flex-col justify-between py-5 px-3 bg-[#F4F6F8] dark:bg-zinc-950 border-r border-zinc-200/50 dark:border-zinc-850/50 transition-all duration-300 ease-in-out`}
+        className={`${
+          isCollapsed ? 'w-16' : 'w-64'
+        } flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-zinc-200/50 bg-[#F4F6F8] px-3 py-5 transition-all duration-300 ease-in-out dark:border-zinc-850/50 dark:bg-zinc-950`}
       >
         <div className="flex flex-col gap-6">
           {/* Logo Header Area */}
@@ -217,7 +240,7 @@ function DashboardLayout() {
       </aside>
 
       {/* Main Content Flush Container */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-zinc-900 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-900">
         {/* Header */}
         <header className="h-14 border-b border-zinc-100 dark:border-zinc-850 flex items-center justify-between px-6 shrink-0 bg-white dark:bg-zinc-900">
           {/* Breadcrumb Replacement for Search */}
@@ -244,55 +267,40 @@ function DashboardLayout() {
           </div>
         </header>
 
-        {shouldShowKycBanner && <KycBanner />}
+        {shouldShowKycBanner && (
+          <KycBanner
+            status={effectiveKycStatus}
+            application={kycApplication}
+            pathname={pathname}
+          />
+        )}
 
         {/* Scrollable Page Outlet */}
-        <main className="flex-1 overflow-y-auto p-6 bg-white dark:bg-zinc-900">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white p-6 dark:bg-zinc-900">
           <Outlet />
         </main>
       </div>
     </div>
+    </WalletProvider>
   )
 }
 
-function isKycComplete(status?: string | null) {
-  if (!status) return false
+function KycBanner({
+  status,
+  application,
+  pathname,
+}: {
+  status: KycStatus
+  application?: KycApplication | null
+  pathname: string
+}) {
+  const { refetch: refetchMe } = useMe()
+  const { refetch: refetchKyc } = useMyKycApplication()
 
-  return ['approved', 'complete', 'completed', 'verified'].includes(
-    status.toLowerCase()
-  )
-}
+  useEffect(() => {
+    void refetchMe()
+    void refetchKyc()
+  }, [pathname, refetchMe, refetchKyc])
 
-function KycBanner() {
-  return (
-    <div className="shrink-0 bg-white px-6 pt-4 dark:bg-zinc-900">
-      <section className="relative overflow-hidden rounded-lg bg-[linear-gradient(110deg,var(--primary)_0%,var(--primary)_58%,#3d80ff_100%)] px-5 py-3.5 text-white shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
-        <div className="pointer-events-none absolute -right-8 -top-12 h-28 w-28 rounded-full bg-white/15" />
-        <div className="pointer-events-none absolute right-12 -bottom-16 h-32 w-32 rounded-full bg-white/10" />
-        <div className="relative flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
-              <Rocket className="h-4 w-4" />
-            </span>
-            <div>
-              <p className="text-[11px] font-medium text-white/75">Complete your KYC</p>
-              <p className="text-sm font-semibold">
-                One step left. Verify your business to unlock your wallet, create campaigns,
-                and start receiving creator content.
-              </p>
-            </div>
-          </div>
-          <Button
-            className="h-8 rounded-md bg-white px-3 text-xs text-primary shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.35),0_1px_2px_rgba(0,0,0,0.12)] ring-1 ring-inset ring-white/30 hover:bg-blue-50 hover:text-primary"
-            onClick={() => {
-              window.location.href = '/dashboard/kyc'
-            }}
-          >
-            Complete KYC
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </section>
-    </div>
-  )
+  return <KycDashboardBanner status={status} application={application} />
 }

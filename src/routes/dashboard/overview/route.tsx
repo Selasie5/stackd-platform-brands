@@ -11,12 +11,14 @@ import {
   ShoppingBag,
   TrendingUp,
 } from 'lucide-react'
+import { useWallet } from '@/contexts/wallet-context'
 
 export const Route = createFileRoute('/dashboard/overview')({
   component: OverviewPage,
 })
 
 function OverviewPage() {
+  const { formatMoney } = useWallet()
   const currentDate = formatDashboardDate(new Date())
 
   return (
@@ -37,14 +39,14 @@ function OverviewPage() {
         <StatCard
           icon={TrendingUp}
           label="Sales performance"
-          value="$23,127"
+          value={formatMoney(23127)}
           delta="+12%"
         />
         <StatCard icon={DollarSign} label="Total Sales" value="1,849" delta="+3%" />
         <StatCard
           icon={ShoppingBag}
           label="Average Revenue"
-          value="$15,239"
+          value={formatMoney(15239)}
           delta="+8%"
         />
         <StatCard
@@ -59,7 +61,7 @@ function OverviewPage() {
       <section className="grid gap-4 xl:grid-cols-[1.75fr_1fr]">
         <DashboardCard
           title="Total Revenue"
-          value="$94,127"
+          value={formatMoney(94127)}
           delta="+9%"
           action="View More"
           className="min-h-[260px]"
@@ -94,7 +96,7 @@ function OverviewPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-3">
-        <DashboardCard title="Average Order Value" value="$992" delta="+2.4%">
+        <DashboardCard title="Average Order Value" value={formatMoney(992)} delta="+2.4%">
           <BarChart
             values={[
               42, 70, 54, 83, 65, 92, 58, 72, 50, 35, 48, 79, 44, 68, 90, 47,

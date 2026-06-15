@@ -90,3 +90,9 @@ export const RESET_PASSWORD_MUTATION = gql`
     resetPassword(email: $email, otp: $otp, newPassword: $newPassword)
   }
 `
+
+export const REGISTER_DEVICE_TOKEN_MUTATION = gql`
+  mutation RegisterDeviceToken($token: String!, $platform: String!) {
+    registerDeviceToken(token: $token, platform: $platform)
+  }
+`
