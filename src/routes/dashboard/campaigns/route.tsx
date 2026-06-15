@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { UgcCreateBrief } from '@/components/campaigns/ugc-create-brief'
+import { CpmCreateBrief } from '@/components/campaigns/cpm-create-brief'
+import { ContestCreateBrief } from '@/components/campaigns/contest-create-brief'
+import { CampaignsList } from '@/components/campaigns/campaigns-list'
 
 const campaignsSearchSchema = z.object({
   action: z.enum(['create']).optional(),
@@ -19,25 +22,13 @@ function CampaignsPage() {
     return <UgcCreateBrief />
   }
 
-  return <CampaignsListPlaceholder campaignType={campaign_type} action={action} />
-}
+  if (action === 'create' && campaign_type === 'CPM') {
+    return <CpmCreateBrief />
+  }
 
-function CampaignsListPlaceholder({
-  action,
-  campaignType,
-}: {
-  action?: 'create'
-  campaignType?: 'UGC' | 'CPM' | 'Contest'
-}) {
-  return (
-    <div>
-      <h1 className="mb-4 text-2xl font-semibold">Campaigns</h1>
-      <p className="text-slate-600">Manage your campaigns here.</p>
-      {action === 'create' && campaignType && campaignType !== 'UGC' && (
-        <p className="mt-4 text-sm text-zinc-500">
-          {campaignType} campaign creation is coming soon.
-        </p>
-      )}
-    </div>
-  )
+  if (action === 'create' && campaign_type === 'Contest') {
+    return <ContestCreateBrief />
+  }
+
+  return <CampaignsList />
 }

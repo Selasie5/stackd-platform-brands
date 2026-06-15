@@ -325,3 +325,29 @@ a {
   animation: spleenet-loader-pulse 0.8s ease-in-out infinite;
   transform-origin: bottom;
 }
+
+/* Centers loaders and empty states in the visible dashboard content area */
+.min-h-viewport-content {
+  min-height: calc(100dvh - 8rem);
+}
+
+/* Empty state folder — document lines scroll */
+@keyframes empty-state-doc-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-22px);
+  }
+}
+
+.empty-state-doc-scroll {
+  animation: empty-state-doc-scroll 2.8s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-doc-scroll {
+    animation: none;
+  }
+}

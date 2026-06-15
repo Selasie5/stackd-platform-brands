@@ -12,6 +12,7 @@ import {
 import { KycStatusBanner } from '@/components/kyc/kyc-status-banner'
 import { KycVerificationTimeline } from '@/components/kyc/kyc-verification-timeline'
 import type { UploadedDocument } from '@/components/kyc/document-upload-slot'
+import { LoadingView } from '@/components/ui/view-state'
 import { useMe } from '@/hooks/use-auth'
 import { useMyKycApplication, useSubmitKyc } from '@/hooks/use-kyc'
 import { uploadToCloudinary } from '@/lib/cloudinary'
@@ -114,11 +115,7 @@ export function KycVerificationTab() {
   const canSubmit = Boolean(requiredUpload) && confirmedAccuracy
 
   if (kycLoading && !application && !meData?.me) {
-    return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
-        Loading verification status…
-      </div>
-    )
+    return <LoadingView label="Loading verification status…" tone="primary" />
   }
 
   return (

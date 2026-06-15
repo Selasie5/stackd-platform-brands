@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { SpleenetLoader } from '@/components/ui/spleenet-loader'
 import { cn } from '@/lib/utils'
 
 export interface UploadedDocument {
@@ -146,7 +147,11 @@ export function DocumentUploadSlot({
             )}
           >
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-zinc-400 ring-1 ring-zinc-200">
-              <Upload className="h-4 w-4" />
+              {isUploading ? (
+                <SpleenetLoader size="sm" tone="primary" label="Uploading file" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
             </span>
             <div>
               <p className="text-xs font-medium text-zinc-700">
