@@ -23,29 +23,53 @@ export function EmptyState({
   action,
   illustration,
   className,
+  compact = false,
+  embedded = false,
 }: {
   title: string
   description?: string
   action?: ReactNode
   illustration?: ReactNode
   className?: string
+  compact?: boolean
+  embedded?: boolean
 }) {
   return (
-    <ViewCenter className={className}>
+    <ViewCenter
+      className={cn(
+        compact && 'min-h-0 justify-center',
+        embedded ? 'px-4 py-6' : compact ? 'py-10' : undefined,
+        className
+      )}
+    >
       <div className="mx-auto flex w-full max-w-[420px] flex-col items-center text-center">
-        <div className="mb-8">{illustration ?? <EmptyStateFolderIllustration />}</div>
+        <div className={cn(embedded ? 'mb-4 scale-90' : 'mb-8')}>
+          {illustration ?? <EmptyStateFolderIllustration />}
+        </div>
 
-        <h2 className="text-[22px] font-semibold leading-snug tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+        <h2
+          className={cn(
+            'font-semibold leading-snug tracking-[-0.02em] text-zinc-900 dark:text-zinc-50',
+            embedded ? 'text-base' : 'text-[22px]'
+          )}
+        >
           {title}
         </h2>
 
         {description ? (
-          <p className="mt-3 max-w-[640px] text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+          <p
+            className={cn(
+              'mt-2 max-w-[640px] leading-relaxed text-zinc-500 dark:text-zinc-400',
+              embedded ? 'text-xs' : 'mt-3 text-sm'
+            )}
+          >
             {description}
           </p>
         ) : null}
 
-        {action ? <div className={cn('mt-8', description ? '' : 'mt-6')}>{action}</div> : null}
+        {action ? (
+          <div className={cn(embedded ? 'mt-4' : description ? 'mt-8' : 'mt-6')}>{action}</div>
+        ) : null}
       </div>
     </ViewCenter>
   )

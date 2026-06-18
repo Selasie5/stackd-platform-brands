@@ -4,8 +4,10 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from 'react'
 import type { ReactNode } from 'react'
+import { FundWalletModal } from '@/components/wallet/fund-wallet-modal'
 import type { BrandWallet } from '@/hooks/use-wallet'
 import { useMyBrandWallet } from '@/hooks/use-wallet'
 import {
@@ -21,6 +23,9 @@ interface WalletContextValue {
   currencySymbol: string
   availableBalance: number
   loading: boolean
+  fundModalOpen: boolean
+  openFundModal: () => void
+  closeFundModal: () => void
   formatMoney: (
     amount: number,
     options?: { maximumFractionDigits?: number; minimumFractionDigits?: number }
@@ -38,6 +43,7 @@ export function WalletProvider({
   skip?: boolean
 }) {
   const { data, loading, refetch } = useMyBrandWallet({ skip })
+  const [fundModalOpen, setFundModalOpen] = useState(false)
   const wallet = data?.myBrandWallet ?? null
   const currency = normalizeCurrencyCode(wallet?.currency)
 
@@ -62,13 +68,26 @@ export function WalletProvider({
       currencySymbol: getCurrencySymbol(currency),
       availableBalance: parseWalletAmount(wallet?.availableBalance),
       loading,
+      fundModalOpen,
+      openFundModal: () => setFundModalOpen(true),
+      closeFundModal: () => setFundModalOpen(false),
       formatMoney,
       refetch: () => refetch(),
     }),
-    [wallet, currency, loading, formatMoney, refetch]
+    [wallet, currency, loading, fundModalOpen, formatMoney, refetch]
   )
 
-  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
+  return (
+    <WalletContext.Provider value={value}>
+      {children}
+      {!skip ? (
+        <FundWalletModal
+          open={fundModalOpen}
+          onClose={() => setFundModalOpen(false)}
+        />
+      ) : null}
+    </WalletContext.Provider>
+  )
 }
 
 export function useWallet() {

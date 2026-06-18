@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { AlertCircle, ChevronLeft, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,7 @@ import {
   PrizeStructureBuilder,
   createInitialPrizePlacements,
 } from '@/components/campaigns/prize-structure-builder'
-import { useCreateContest, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
+import { useContest, useCreateContest, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
 import { buildCreateContestInput } from '@/lib/opportunity-mappers'
 import { useWallet } from '@/contexts/wallet-context'
 import { cn } from '@/lib/utils'
@@ -61,13 +61,68 @@ const FIELD_ID = {
   announcementTime: 'contest-announcement-time',
 } as const
 
-export function ContestCreateBrief() {
+export function ContestCreateBrief({ existingId }: { existingId?: string }) {
   const navigate = useNavigate()
   const { currency, currencySymbol, availableBalance, formatMoney } = useWallet()
   const { saveContest, loading: saving } = useCreateContest()
   const { submitForApproval, loading: submitting } = useSubmitOpportunityForApproval()
-  const [draftId, setDraftId] = useState<string | null>(null)
+  const { data: existingData, loading: loadingExisting } = useContest(existingId)
+  const [draftId, setDraftId] = useState<string | null>(existingId ?? null)
   const [pendingAction, setPendingAction] = useState<'draft' | 'publish' | null>(null)
+  const isEdit = Boolean(existingId) && !loadingExisting && Boolean(existingData?.contest)
+
+  useEffect(() => {
+    const d = existingData?.contest
+    if (!d) return
+    setTitle(d.title ?? '')
+    setProductName(d.productName ?? '')
+    setShortDescription(d.shortDescription ?? '')
+    setFullDescription(d.fullDescription ?? '')
+    setExternalBriefLink(d.externalBriefLink ?? '')
+    setContestCategory(d.category ?? '')
+    setVideoType(d.videoType ?? '')
+    setVideoLengthSeconds(d.videoLengthSeconds != null ? String(d.videoLengthSeconds) : '')
+    setTargetPlatform(d.targetPlatform ?? '')
+    setHashtags(d.requiredHashtags ? d.requiredHashtags.split(' ').map((h) => h.replace(/^#/, '')) : [])
+    setRequiredCaption(d.requiredCaption ?? '')
+    setBrandTag(d.requiredBrandTag ?? '')
+    setPostingRequired(d.postingRequired ?? true)
+    setContestRules(d.contestRules ?? '')
+    setEligibilityRules(d.eligibilityRules ?? '')
+    setProductDeliveryDetails(d.productDeliveryDetails ?? '')
+    setUsageRights((d.usageRightsPackage as (typeof USAGE_RIGHTS_OPTIONS)[number]['id']) ?? 'organic')
+    setMinimumWinners(d.minimumWinners != null ? String(d.minimumWinners) : '15')
+    setCpmLayerEnabled(d.cpmBudget != null && Number(d.cpmBudget) > 0)
+    setPayPerThousand(d.payPer1000Views != null ? String(d.payPer1000Views) : '')
+    setMaxViewsPerCreator(d.maxPayableViewsPerCreator != null ? String(d.maxPayableViewsPerCreator) : '')
+    if (d.submissionDeadline) {
+      setSubmissionDate(d.submissionDeadline.slice(0, 10))
+      setSubmissionTime(d.submissionDeadline.slice(11, 16))
+    }
+    if (d.winnerAnnouncementDate) {
+      setAnnouncementDate(d.winnerAnnouncementDate.slice(0, 10))
+      setAnnouncementTime(d.winnerAnnouncementDate.slice(11, 16))
+    }
+    if (d.referenceLinks && d.referenceLinks.length > 0) {
+      setInspirationLinks(
+        d.referenceLinks.map((r) => ({
+          id: crypto.randomUUID(),
+          kind: r.isInspiration ? 'inspiration' as const : 'reference' as const,
+          label: r.label ?? '',
+          url: r.url,
+        }))
+      )
+    }
+    if (d.rewards && d.rewards.length > 0) {
+      setPrizePlacements(
+        d.rewards.map((r) => ({
+          id: crypto.randomUUID(),
+          label: r.label ?? '',
+          amount: String(Math.max(0, Number(r.amount) || 0)),
+        }))
+      )
+    }
+  }, [existingData])
 
   const [title, setTitle] = useState('')
   const [productName, setProductName] = useState('')
@@ -217,11 +272,12 @@ export function ContestCreateBrief() {
           <header className="space-y-4 border-b border-zinc-100 pb-8">
             <div>
               <h1 className="text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
-                Contest Brief
+                {isEdit ? 'Edit' : 'Contest Brief'}
               </h1>
               <BriefProse>
-                Launch a creator contest with tiered prizes, optional CPM payouts, and clear
-                submission rules. Winners are ranked by your criteria after the submission deadline.
+                {isEdit
+                  ? 'Update the contest below. Changes will be saved to the existing campaign.'
+                  : 'Launch a creator contest with tiered prizes, optional CPM payouts, and clear submission rules. Winners are ranked by your criteria after the submission deadline.'}
               </BriefProse>
             </div>
           </header>
@@ -646,7 +702,7 @@ export function ContestCreateBrief() {
                 isLoading={pendingAction === 'publish'}
                 onClick={() => void handlePublish()}
               >
-                Publish campaign
+                {isEdit ? 'Update campaign' : 'Publish campaign'}
               </Button>
               <Button
                 variant="outline"
@@ -655,7 +711,7 @@ export function ContestCreateBrief() {
                 isLoading={pendingAction === 'draft'}
                 onClick={() => void handleSaveDraft()}
               >
-                Save as draft
+                {isEdit ? 'Save changes' : 'Save as draft'}
               </Button>
             </div>
           </div>

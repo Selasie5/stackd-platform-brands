@@ -18,6 +18,10 @@ import {
 import { KycDashboardBanner } from '@/components/kyc/kyc-dashboard-banner'
 import { DeviceTokenSync } from '@/components/auth/device-token-sync'
 import { CreateCampaignButton } from '@/components/create-campaign-button'
+import { NewMessageButton } from '@/components/messages/new-message-button'
+import { FundWalletButton } from '@/components/wallet/fund-wallet-button'
+import { WalletStatusBanners } from '@/components/wallet/wallet-status-banners'
+import { MessagesProvider } from '@/contexts/messages-context'
 import { WalletProvider } from '@/contexts/wallet-context'
 import { useMe, useLogout } from '@/hooks/use-auth'
 import { useMyKycApplication } from '@/hooks/use-kyc'
@@ -108,17 +112,10 @@ function NavItem({
 }
 
 function DashboardLayout() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const location = useLocation()
-  const pathname = location.pathname
-  const searchStr = useRouterState({ select: (state) => state.location.searchStr })
   const { data: meData, loading: meLoading } = useMe()
   const { data: kycData, loading: kycLoading } = useMyKycApplication()
-  const { logout } = useLogout()
 
   const user = meData?.me
-  const brandName = user?.brand?.brandName ?? 'Brand'
-  const userEmail = user?.email ?? ''
   const kycApplication = kycData?.myKycApplication
   const effectiveKycStatus = resolveEffectiveKycStatus(
     user?.brand?.kycStatus,
@@ -129,6 +126,55 @@ function DashboardLayout() {
     !kycLoading &&
     Boolean(user?.brand) &&
     !isKycComplete(effectiveKycStatus)
+
+  return (
+    <WalletProvider
+      skip={
+        meLoading ||
+        kycLoading ||
+        !user?.brand ||
+        !isKycComplete(effectiveKycStatus)
+      }
+    >
+      <MessagesProvider>
+        <DashboardLayoutContent
+        user={user}
+        meLoading={meLoading}
+        shouldShowKycBanner={shouldShowKycBanner}
+        effectiveKycStatus={effectiveKycStatus}
+        kycApplication={kycApplication}
+      />
+      </MessagesProvider>
+    </WalletProvider>
+  )
+}
+
+function DashboardLayoutContent({
+  user,
+  meLoading,
+  shouldShowKycBanner,
+  effectiveKycStatus,
+  kycApplication,
+}: {
+  user?: {
+    email?: string
+    brand?: { brandName?: string } | null
+  } | null
+  meLoading: boolean
+  shouldShowKycBanner: boolean
+  effectiveKycStatus: KycStatus
+  kycApplication?: KycApplication | null
+}) {
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const location = useLocation()
+  const pathname = location.pathname
+  const searchStr = useRouterState({ select: (state) => state.location.searchStr })
+  const { logout } = useLogout()
+
+  const brandName = user?.brand?.brandName ?? 'Brand'
+  const userEmail = user?.email ?? ''
+  const isWalletPage = pathname === '/dashboard/wallet'
+  const isMessagesPage = pathname === '/dashboard/messages'
 
   // Generate initials from brand name
   const getInitials = (name: string) => {
@@ -143,14 +189,7 @@ function DashboardLayout() {
   const breadcrumbs = getBreadcrumbs(pathname, searchStr)
 
   return (
-    <WalletProvider
-      skip={
-        meLoading ||
-        kycLoading ||
-        !user?.brand ||
-        !isKycComplete(effectiveKycStatus)
-      }
-    >
+    <>
       <DeviceTokenSync />
       <div className="fixed inset-0 flex overflow-hidden bg-[#F4F6F8] font-sans dark:bg-zinc-950">
       {/* Sidebar */}
@@ -269,7 +308,7 @@ function DashboardLayout() {
       {/* Main Content Flush Container */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-900">
         {/* Header */}
-        <header className="h-14 border-b border-zinc-100 dark:border-zinc-850 flex items-center justify-between px-6 shrink-0 bg-white dark:bg-zinc-900">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-100 bg-white px-6 dark:border-zinc-850 dark:bg-zinc-900">
           {/* Breadcrumb Replacement for Search */}
           <div className="flex items-center gap-2 text-[12px] font-normal text-zinc-400 dark:text-zinc-500">
             {breadcrumbs.map((crumb, idx) => (
@@ -295,9 +334,17 @@ function DashboardLayout() {
 
           {/* Action Icons */}
           <div className="flex items-center gap-3">
-            <CreateCampaignButton />
+            {isWalletPage ? (
+              <FundWalletButton />
+            ) : isMessagesPage ? (
+              <NewMessageButton />
+            ) : (
+              <CreateCampaignButton />
+            )}
           </div>
         </header>
+
+        {isWalletPage ? <WalletStatusBanners /> : null}
 
         {shouldShowKycBanner && (
           <KycBanner
@@ -313,7 +360,7 @@ function DashboardLayout() {
         </main>
       </div>
     </div>
-    </WalletProvider>
+    </>
   )
 }
 
