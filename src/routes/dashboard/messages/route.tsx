@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { MessagesPanel } from '@/components/messages/messages-panel'
 
 export const Route = createFileRoute('/dashboard/messages')({
   component: MessagesPage,
@@ -6,9 +7,8 @@ export const Route = createFileRoute('/dashboard/messages')({
 
 function MessagesPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Messages</h1>
-      <p className="text-slate-600">Communicate with creators.</p>
+    <div className="mx-auto max-w-7xl">
+      <MessagesPanel />
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import { toast } from 'sonner'
 import {
+  CONTEST_QUERY,
+  CPM_DEAL_QUERY,
   CREATE_CONTEST_MUTATION,
   CREATE_CPM_DEAL_MUTATION,
   CREATE_UGC_ORDER_MUTATION,
@@ -8,6 +10,7 @@ import {
   MY_CPM_DEALS_QUERY,
   MY_UGC_ORDERS_QUERY,
   SUBMIT_OPPORTUNITY_FOR_APPROVAL_MUTATION,
+  UGC_ORDER_QUERY,
   UPDATE_CONTEST_MUTATION,
   UPDATE_CPM_DEAL_MUTATION,
   UPDATE_UGC_ORDER_MUTATION,
@@ -58,6 +61,72 @@ export interface ContestSummary extends OpportunitySummary {
   minimumWinners: number
 }
 
+export interface OpportunityReferenceLink {
+  url: string
+  label?: string | null
+  isInspiration?: boolean | null
+}
+
+export interface OpportunityReward {
+  placement: number
+  label?: string | null
+  amount: string
+  currency: string
+}
+
+export interface UgcOrderDetail extends UgcOrderSummary {
+  fullDescription?: string | null
+  externalBriefLink?: string | null
+  videoType?: string | null
+  videoLengthSeconds?: number | null
+  wordsToSay?: string | null
+  wordsToAvoid?: string | null
+  callToAction?: string | null
+  requiredShots?: string | null
+  revisionLimit?: number | null
+  postingRequired?: boolean | null
+  targetPlatform?: string | null
+  productDeliveryDetails?: string | null
+  usageRightsPackage?: string | null
+  referenceLinks?: OpportunityReferenceLink[] | null
+}
+
+export interface CpmDealDetail extends CpmDealSummary {
+  fullDescription?: string | null
+  externalBriefLink?: string | null
+  targetPlatform?: string | null
+  requiredHashtags?: string | null
+  requiredCaption?: string | null
+  requiredBrandTag?: string | null
+  payPer1000Views?: number | null
+  maxPayableViewsPerCreator?: number | null
+  productDeliveryDetails?: string | null
+  usageRightsPackage?: string | null
+  referenceLinks?: OpportunityReferenceLink[] | null
+}
+
+export interface ContestDetail extends ContestSummary {
+  fullDescription?: string | null
+  externalBriefLink?: string | null
+  category?: string | null
+  videoType?: string | null
+  videoLengthSeconds?: number | null
+  targetPlatform?: string | null
+  requiredHashtags?: string | null
+  requiredCaption?: string | null
+  requiredBrandTag?: string | null
+  postingRequired?: boolean | null
+  contestRules?: string | null
+  eligibilityRules?: string | null
+  usageRightsPackage?: string | null
+  productDeliveryDetails?: string | null
+  cpmBudget?: string | null
+  payPer1000Views?: number | null
+  maxPayableViewsPerCreator?: number | null
+  referenceLinks?: OpportunityReferenceLink[] | null
+  rewards?: OpportunityReward[] | null
+}
+
 const opportunityListRefetchQueries = [
   { query: MY_UGC_ORDERS_QUERY },
   { query: MY_CPM_DEALS_QUERY },
@@ -84,6 +153,33 @@ export function useMyCpmDeals(status?: OpportunityStatus) {
 export function useMyContests(status?: OpportunityStatus) {
   return useQuery<{ myContests: ContestSummary[] }>(MY_CONTESTS_QUERY, {
     variables: status ? { status } : undefined,
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  })
+}
+
+export function useUgcOrder(id?: string) {
+  return useQuery<{ ugcOrder: UgcOrderDetail }>(UGC_ORDER_QUERY, {
+    variables: id ? { id } : undefined,
+    skip: !id,
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  })
+}
+
+export function useCpmDeal(id?: string) {
+  return useQuery<{ cpmDeal: CpmDealDetail }>(CPM_DEAL_QUERY, {
+    variables: id ? { id } : undefined,
+    skip: !id,
+    fetchPolicy: 'cache-and-network',
+    errorPolicy: 'ignore',
+  })
+}
+
+export function useContest(id?: string) {
+  return useQuery<{ contest: ContestDetail }>(CONTEST_QUERY, {
+    variables: id ? { id } : undefined,
+    skip: !id,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })

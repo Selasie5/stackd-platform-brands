@@ -1,4 +1,6 @@
-import { Briefcase, Trophy, Video } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { Briefcase, Expand, Eye, Pencil, Trophy, Video } from 'lucide-react'
 import type { OpportunityStatus } from '@/hooks/use-opportunities'
 import {
   useMyContests,
@@ -6,9 +8,16 @@ import {
   useMyUgcOrders,
 } from '@/hooks/use-opportunities'
 import { CampaignsEmptyState } from '@/components/campaigns/campaigns-empty-state'
+import { Button } from '@/components/ui/button'
+import { DataTable } from '@/components/ui/data-table'
+import type { DataTableColumn } from '@/components/ui/data-table'
+import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
+import { DotBadge } from '@/components/ui/dot-badge'
 import { LoadingView } from '@/components/ui/view-state'
+import { Select } from '@/components/ui/select'
+import { Tooltip } from '@/components/ui/tooltip'
 import { useWallet } from '@/contexts/wallet-context'
-import { cn } from '@/lib/utils'
 
 type CampaignListItem = {
   id: string
@@ -20,24 +29,45 @@ type CampaignListItem = {
   createdAt: string
 }
 
-const STATUS_LABELS: Record<OpportunityStatus, string> = {
-  draft: 'Draft',
-  pending_approval: 'Pending approval',
-  live: 'Live',
-  paused: 'Paused',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
-  completed: 'Completed',
-}
-
-const STATUS_STYLES: Record<OpportunityStatus, string> = {
-  draft: 'bg-zinc-100 text-zinc-600',
-  pending_approval: 'bg-amber-50 text-amber-700',
-  live: 'bg-emerald-50 text-emerald-700',
-  paused: 'bg-orange-50 text-orange-700',
-  closed: 'bg-slate-100 text-slate-600',
-  cancelled: 'bg-red-50 text-red-700',
-  completed: 'bg-blue-50 text-blue-700',
+const CAMPAIGN_STATUS_STYLES: Record<
+  OpportunityStatus,
+  { label: string; badge: string; dot: string }
+> = {
+  draft: {
+    label: 'Draft',
+    badge: 'bg-zinc-100 text-zinc-600 ring-zinc-200',
+    dot: 'bg-zinc-400',
+  },
+  pending_approval: {
+    label: 'Pending approval',
+    badge: 'bg-amber-50 text-amber-700 ring-amber-100',
+    dot: 'bg-amber-500',
+  },
+  live: {
+    label: 'Live',
+    badge: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+    dot: 'bg-emerald-500',
+  },
+  paused: {
+    label: 'Paused',
+    badge: 'bg-orange-50 text-orange-700 ring-orange-100',
+    dot: 'bg-orange-500',
+  },
+  closed: {
+    label: 'Closed',
+    badge: 'bg-slate-100 text-slate-600 ring-slate-200',
+    dot: 'bg-slate-400',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    badge: 'bg-red-50 text-red-700 ring-red-100',
+    dot: 'bg-red-500',
+  },
+  completed: {
+    label: 'Completed',
+    badge: 'bg-blue-50 text-blue-700 ring-blue-100',
+    dot: 'bg-blue-500',
+  },
 }
 
 const TYPE_ICONS = {
@@ -46,12 +76,144 @@ const TYPE_ICONS = {
   Contest: Trophy,
 } as const
 
+const TYPE_FILTER_OPTIONS = [
+  { value: '', label: 'All types' },
+  { value: 'UGC', label: 'UGC' },
+  { value: 'CPM', label: 'CPM' },
+  { value: 'Contest', label: 'Contest' },
+]
+
+const STATUS_FILTER_OPTIONS = [
+  { value: '', label: 'All statuses' },
+  ...Object.entries(CAMPAIGN_STATUS_STYLES).map(([value, style]) => ({
+    value,
+    label: style.label,
+  })),
+]
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+function buildCampaignColumns(
+  formatMoney: (amount: number) => string,
+  navigate: ReturnType<typeof useNavigate>
+): DataTableColumn<CampaignListItem>[] {
+  return [
+    {
+      id: 'title',
+      header: 'Campaign',
+      sortable: true,
+      sortValue: (row) => row.title,
+      cell: (row) => (
+        <>
+          <p className="font-medium text-zinc-900">{row.title}</p>
+          <p className="text-xs text-zinc-500">{row.productName}</p>
+        </>
+      ),
+    },
+    {
+      id: 'type',
+      header: 'Type',
+      sortable: true,
+      sortValue: (row) => row.type,
+      cell: (row) => {
+        const Icon = TYPE_ICONS[row.type]
+        return (
+          <span className="inline-flex items-center gap-1.5 text-zinc-700">
+            <Icon className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
+            {row.type}
+          </span>
+        )
+      },
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      sortable: true,
+      sortValue: (row) => row.status,
+      cell: (row) => {
+        const status = CAMPAIGN_STATUS_STYLES[row.status]
+        return (
+          <DotBadge
+            label={status.label}
+            badgeClassName={status.badge}
+            dotClassName={status.dot}
+          />
+        )
+      },
+    },
+    {
+      id: 'budget',
+      header: 'Budget',
+      sortable: true,
+      sortValue: (row) => row.budget,
+      cellClassName: 'font-medium text-zinc-800',
+      cell: (row) => formatMoney(row.budget),
+    },
+    {
+      id: 'createdAt',
+      header: 'Created',
+      sortable: true,
+      sortValue: (row) => new Date(row.createdAt).getTime(),
+      cellClassName: 'text-zinc-500',
+      cell: (row) => formatDate(row.createdAt),
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: (row) => (
+        <div className="flex items-center gap-1">
+          <Tooltip content="View campaign">
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: '/dashboard/campaigns',
+                  search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                })
+              }
+              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Edit campaign">
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: '/dashboard/campaigns',
+                  search: { action: 'edit', campaign_type: row.type, opportunity_id: row.id },
+                })
+              }
+              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          </Tooltip>
+          <Tooltip content="Open detail view">
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: '/dashboard/campaigns',
+                  search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                })
+              }
+              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+            >
+              <Expand className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ]
 }
 
 export function CampaignsList() {
@@ -90,7 +252,59 @@ export function CampaignsList() {
       budget: Number(item.totalContestBudget) || 0,
       createdAt: item.createdAt,
     })),
-  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  ]
+
+  const [typeFilter, setTypeFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    if (!searchInput.trim()) {
+      setSearchQuery('')
+    }
+  }, [searchInput])
+
+  const navigate = useNavigate()
+
+  const columns = useMemo(() => buildCampaignColumns(formatMoney, navigate), [formatMoney, navigate])
+
+  const filtered = useMemo(() => {
+    let rows = [...campaigns]
+
+    if (typeFilter) {
+      rows = rows.filter((row) => row.type === typeFilter)
+    }
+
+    if (statusFilter) {
+      rows = rows.filter((row) => row.status === statusFilter)
+    }
+
+    if (dateFrom) {
+      const from = new Date(`${dateFrom}T00:00:00`)
+      rows = rows.filter((row) => new Date(row.createdAt) >= from)
+    }
+
+    if (dateTo) {
+      const to = new Date(`${dateTo}T23:59:59`)
+      rows = rows.filter((row) => new Date(row.createdAt) <= to)
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      rows = rows.filter(
+        (row) =>
+          row.title.toLowerCase().includes(q) ||
+          row.productName.toLowerCase().includes(q)
+      )
+    }
+
+    return rows
+  }, [campaigns, typeFilter, statusFilter, dateFrom, dateTo, searchQuery])
+
+  const dateFromValue = dateFrom ? new Date(`${dateFrom}T00:00:00`) : undefined
 
   if (loading && campaigns.length === 0) {
     return <LoadingView label="Loading campaigns…" tone="primary" />
@@ -100,54 +314,80 @@ export function CampaignsList() {
     return <CampaignsEmptyState />
   }
 
+  const handleSearch = () => {
+    setSearchQuery(searchInput)
+  }
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="border-b border-zinc-100 bg-zinc-50/80 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
-            <tr>
-              <th className="px-4 py-3">Campaign</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Budget</th>
-              <th className="px-4 py-3">Created</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {campaigns.map((campaign) => {
-              const Icon = TYPE_ICONS[campaign.type]
-              return (
-                <tr key={`${campaign.type}-${campaign.id}`} className="hover:bg-zinc-50/60">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-zinc-900">{campaign.title}</p>
-                    <p className="text-xs text-zinc-500">{campaign.productName}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1.5 text-zinc-700">
-                      <Icon className="h-3.5 w-3.5 text-zinc-400" aria-hidden="true" />
-                      {campaign.type}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={cn(
-                        'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
-                        STATUS_STYLES[campaign.status]
-                      )}
-                    >
-                      {STATUS_LABELS[campaign.status]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-medium text-zinc-800">
-                    {formatMoney(campaign.budget)}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500">{formatDate(campaign.createdAt)}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <DataTable
+      data={filtered}
+      columns={columns}
+      getRowKey={(row) => `${row.type}-${row.id}`}
+      defaultSort={{ columnId: 'createdAt', direction: 'desc' }}
+      height={520}
+      title={
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Search campaigns…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            className="w-[220px]"
+          />
+          <Button size="sm" onClick={handleSearch} disabled={!searchInput.trim()}>
+            Search
+          </Button>
+        </div>
+      }
+      toolbar={
+        <div className="flex flex-wrap gap-3">
+          <div className="w-[160px]">
+            <Select
+              id="campaign-type-filter"
+              value={typeFilter}
+              onChange={setTypeFilter}
+              options={TYPE_FILTER_OPTIONS}
+              placeholder="Filter by type"
+            />
+          </div>
+          <div className="w-[180px]">
+            <Select
+              id="campaign-status-filter"
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={STATUS_FILTER_OPTIONS}
+              placeholder="Filter by status"
+            />
+          </div>
+          <div className="w-[160px]">
+            <DatePicker
+              id="campaign-date-from"
+              value={dateFrom}
+              onChange={setDateFrom}
+              placeholder="From date"
+            />
+          </div>
+          <div className="w-[160px]">
+            <DatePicker
+              id="campaign-date-to"
+              value={dateTo}
+              onChange={setDateTo}
+              placeholder="To date"
+              fromDate={dateFromValue}
+            />
+          </div>
+        </div>
+      }
+      emptyState={{
+        title: 'No campaigns match your filters',
+        description: 'Try adjusting your filters to find the campaign you are looking for.',
+      }}
+    />
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   AlertCircle,
@@ -24,7 +24,7 @@ import {
   getDeadlineOrderError,
 } from '@/components/campaigns/dual-deadline-picker'
 import { HashtagInput } from '@/components/campaigns/hashtag-input'
-import { useCreateCpmDeal, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
+import { useCpmDeal, useCreateCpmDeal, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
 import { buildCreateCpmDealInput } from '@/lib/opportunity-mappers'
 import { useWallet } from '@/contexts/wallet-context'
 import { cn } from '@/lib/utils'
@@ -53,13 +53,47 @@ const FIELD_ID = {
   viewCountTime: 'cpm-view-count-time',
 } as const
 
-export function CpmCreateBrief() {
+export function CpmCreateBrief({ existingId }: { existingId?: string }) {
   const navigate = useNavigate()
   const { currency, currencySymbol, availableBalance, formatMoney } = useWallet()
   const { saveCpmDeal, loading: saving } = useCreateCpmDeal()
   const { submitForApproval, loading: submitting } = useSubmitOpportunityForApproval()
-  const [draftId, setDraftId] = useState<string | null>(null)
+  const { data: existingData, loading: loadingExisting } = useCpmDeal(existingId)
+  const [draftId, setDraftId] = useState<string | null>(existingId ?? null)
   const [pendingAction, setPendingAction] = useState<'draft' | 'publish' | null>(null)
+  const isEdit = Boolean(existingId) && !loadingExisting && Boolean(existingData?.cpmDeal)
+
+  useEffect(() => {
+    const d = existingData?.cpmDeal
+    if (!d) return
+    setTitle(d.title ?? '')
+    setProductName(d.productName ?? '')
+    setShortDescription(d.shortDescription ?? '')
+    setFullDescription(d.fullDescription ?? '')
+    setExternalBriefLink(d.externalBriefLink ?? '')
+    setTargetPlatform(d.targetPlatform ?? '')
+    setHashtags(d.requiredHashtags ? d.requiredHashtags.split(' ').map((h) => h.replace(/^#/, '')) : [])
+    setRequiredCaption(d.requiredCaption ?? '')
+    setBrandTag(d.requiredBrandTag ?? '')
+    setPayPerThousand(d.payPer1000Views != null ? String(d.payPer1000Views) : '')
+    setMaxViewsPerCreator(d.maxPayableViewsPerCreator != null ? String(d.maxPayableViewsPerCreator) : '')
+    setCreatorsNeeded(d.numberOfCreators != null ? String(d.numberOfCreators) : '1')
+    setProductDeliveryDetails(d.productDeliveryDetails ?? '')
+    setUsageRights((d.usageRightsPackage as (typeof USAGE_RIGHTS_OPTIONS)[number]['id']) ?? 'organic')
+    if (d.postingDeadline) {
+      setPostingDate(d.postingDeadline.slice(0, 10))
+      setPostingTime(d.postingDeadline.slice(11, 16))
+    }
+    if (d.finalViewCountDeadline) {
+      setViewCountDate(d.finalViewCountDeadline.slice(0, 10))
+      setViewCountTime(d.finalViewCountDeadline.slice(11, 16))
+    }
+    if (d.referenceLinks && d.referenceLinks.length > 0) {
+      setReferenceLinks(
+        d.referenceLinks.map((r) => ({ id: crypto.randomUUID(), label: r.label ?? '', url: r.url }))
+      )
+    }
+  }, [existingData])
 
   const [title, setTitle] = useState('')
   const [productName, setProductName] = useState('')
@@ -196,11 +230,12 @@ export function CpmCreateBrief() {
           <header className="space-y-4 border-b border-zinc-100 pb-8">
             <div>
               <h1 className="text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
-                CPM Deal Brief
+                {isEdit ? 'Edit' : 'CPM Deal Brief'}
               </h1>
               <BriefProse>
-                Configure a cost-per-mille campaign. Creators are paid based on verified views
-                up to your maximum per creator, with budget calculated automatically.
+                {isEdit
+                  ? 'Update the CPM deal below. Changes will be saved to the existing campaign.'
+                  : 'Configure a cost-per-mille campaign. Creators are paid based on verified views up to your maximum per creator, with budget calculated automatically.'}
               </BriefProse>
             </div>
           </header>
@@ -586,7 +621,7 @@ export function CpmCreateBrief() {
                 isLoading={pendingAction === 'publish'}
                 onClick={() => void handlePublish()}
               >
-                Publish campaign
+                {isEdit ? 'Update campaign' : 'Publish campaign'}
               </Button>
               <Button
                 variant="outline"
@@ -595,7 +630,7 @@ export function CpmCreateBrief() {
                 isLoading={pendingAction === 'draft'}
                 onClick={() => void handleSaveDraft()}
               >
-                Save as draft
+                {isEdit ? 'Save changes' : 'Save as draft'}
               </Button>
             </div>
           </div>

@@ -11,6 +11,113 @@ const opportunitySummaryFields = `
   updatedAt
 `
 
+const ugcOrderDetailFields = `
+  ${opportunitySummaryFields}
+  totalBudget
+  deadline
+  numberOfCreators
+  flatRatePerCreator
+  fullDescription
+  externalBriefLink
+  videoType
+  videoLengthSeconds
+  wordsToSay
+  wordsToAvoid
+  callToAction
+  requiredShots
+  revisionLimit
+  postingRequired
+  targetPlatform
+  productDeliveryDetails
+  usageRightsPackage
+  referenceLinks {
+    url
+    label
+  }
+`
+
+const cpmDealDetailFields = `
+  ${opportunitySummaryFields}
+  maxCampaignBudget
+  postingDeadline
+  finalViewCountDeadline
+  numberOfCreators
+  fullDescription
+  externalBriefLink
+  targetPlatform
+  requiredHashtags
+  requiredCaption
+  requiredBrandTag
+  payPer1000Views
+  maxPayableViewsPerCreator
+  productDeliveryDetails
+  usageRightsPackage
+  referenceLinks {
+    url
+    label
+  }
+`
+
+const contestDetailFields = `
+  ${opportunitySummaryFields}
+  totalContestBudget
+  submissionDeadline
+  winnerAnnouncementDate
+  minimumWinners
+  fullDescription
+  externalBriefLink
+  category
+  videoType
+  videoLengthSeconds
+  targetPlatform
+  requiredHashtags
+  requiredCaption
+  requiredBrandTag
+  postingRequired
+  contestRules
+  eligibilityRules
+  usageRightsPackage
+  productDeliveryDetails
+  cpmBudget
+  payPer1000Views
+  maxPayableViewsPerCreator
+  referenceLinks {
+    url
+    label
+    isInspiration
+  }
+  rewards {
+    placement
+    label
+    amount
+    currency
+  }
+`
+
+export const UGC_ORDER_QUERY = gql`
+  query UgcOrder($id: ID!) {
+    ugcOrder(id: $id) {
+      ${ugcOrderDetailFields}
+    }
+  }
+`
+
+export const CPM_DEAL_QUERY = gql`
+  query CpmDeal($id: ID!) {
+    cpmDeal(id: $id) {
+      ${cpmDealDetailFields}
+    }
+  }
+`
+
+export const CONTEST_QUERY = gql`
+  query Contest($id: ID!) {
+    contest(id: $id) {
+      ${contestDetailFields}
+    }
+  }
+`
+
 export const MY_UGC_ORDERS_QUERY = gql`
   query MyUgcOrders($status: OpportunityStatus) {
     myUgcOrders(status: $status) {

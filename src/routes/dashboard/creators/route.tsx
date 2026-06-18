@@ -5,10 +5,5 @@ export const Route = createFileRoute('/dashboard/creators')({
 })
 
 function CreatorsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Creators</h1>
-      <p className="text-slate-600">Discover and manage creators.</p>
-    </div>
-  )
+  return <div />
 }

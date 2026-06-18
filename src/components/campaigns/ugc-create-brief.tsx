@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   AlertCircle,
@@ -21,7 +21,7 @@ import {
   VIDEO_TYPE_OPTIONS,
   textareaClassName,
 } from '@/components/campaigns/campaign-constants'
-import { useCreateUgcOrder, useSubmitOpportunityForApproval } from '@/hooks/use-opportunities'
+import { useCreateUgcOrder, useSubmitOpportunityForApproval, useUgcOrder } from '@/hooks/use-opportunities'
 import { buildCreateUgcOrderInput } from '@/lib/opportunity-mappers'
 import { useWallet } from '@/contexts/wallet-context'
 import { cn } from '@/lib/utils'
@@ -57,13 +57,47 @@ const FIELD_ID = {
   deadlineTime: 'ugc-deadline-time',
 } as const
 
-export function UgcCreateBrief() {
+export function UgcCreateBrief({ existingId }: { existingId?: string }) {
   const navigate = useNavigate()
   const { currency, currencySymbol, availableBalance, formatMoney } = useWallet()
   const { saveUgcOrder, loading: saving } = useCreateUgcOrder()
   const { submitForApproval, loading: submitting } = useSubmitOpportunityForApproval()
-  const [draftId, setDraftId] = useState<string | null>(null)
+  const { data: existingData, loading: loadingExisting } = useUgcOrder(existingId)
+  const [draftId, setDraftId] = useState<string | null>(existingId ?? null)
   const [pendingAction, setPendingAction] = useState<'draft' | 'publish' | null>(null)
+  const isEdit = Boolean(existingId) && !loadingExisting && Boolean(existingData?.ugcOrder)
+
+  useEffect(() => {
+    const d = existingData?.ugcOrder
+    if (!d) return
+    setTitle(d.title ?? '')
+    setProductName(d.productName ?? '')
+    setShortDescription(d.shortDescription ?? '')
+    setFullDescription(d.fullDescription ?? '')
+    setExternalBriefLink(d.externalBriefLink ?? '')
+    setVideoType(d.videoType ?? '')
+    setVideoLengthSeconds(d.videoLengthSeconds != null ? String(d.videoLengthSeconds) : '')
+    setCreatorsNeeded(d.numberOfCreators != null ? String(d.numberOfCreators) : '1')
+    setFlatRate(d.flatRatePerCreator ? String(Number(d.flatRatePerCreator) || 0) : '')
+    setWordsToSay(d.wordsToSay ?? '')
+    setWordsToAvoid(d.wordsToAvoid ?? '')
+    setCallToAction(d.callToAction ?? '')
+    setRequiredShots(d.requiredShots ?? '')
+    setRevisionLimit(d.revisionLimit != null ? String(d.revisionLimit) : '2')
+    setPostingRequired(d.postingRequired ?? false)
+    setTargetPlatform(d.targetPlatform ?? '')
+    setProductDeliveryDetails(d.productDeliveryDetails ?? '')
+    setUsageRights((d.usageRightsPackage as (typeof USAGE_RIGHTS_OPTIONS)[number]['id']) ?? 'organic')
+    if (d.deadline) {
+      setDeadlineDate(d.deadline.slice(0, 10))
+      setDeadlineTime(d.deadline.slice(11, 16))
+    }
+    if (d.referenceLinks && d.referenceLinks.length > 0) {
+      setReferenceLinks(
+        d.referenceLinks.map((r) => ({ id: crypto.randomUUID(), label: r.label ?? '', url: r.url }))
+      )
+    }
+  }, [existingData])
   const [title, setTitle] = useState('')
   const [productName, setProductName] = useState('')
   const [shortDescription, setShortDescription] = useState('')
@@ -194,12 +228,12 @@ export function UgcCreateBrief() {
         <header className="space-y-4 border-b border-zinc-100 pb-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
-              UGC Campaign Brief
+              {isEdit ? 'Edit' : 'UGC Campaign Brief'}
             </h1>
             <BriefProse>
-              Build a creator-ready brief below. This document will be shared with creators as
-              your campaign instructions — write clearly, and fill in the structured fields where
-              they appear in the flow.
+              {isEdit
+                ? 'Update the campaign brief below. Changes will be saved to the existing campaign.'
+                : 'Build a creator-ready brief below. This document will be shared with creators as your campaign instructions — write clearly, and fill in the structured fields where they appear in the flow.'}
             </BriefProse>
           </div>
         </header>
@@ -594,7 +628,7 @@ export function UgcCreateBrief() {
               isLoading={pendingAction === 'publish'}
               onClick={() => void handlePublish()}
             >
-              Publish campaign
+              {isEdit ? 'Update campaign' : 'Publish campaign'}
             </Button>
             <Button
               variant="outline"
@@ -603,7 +637,7 @@ export function UgcCreateBrief() {
               isLoading={pendingAction === 'draft'}
               onClick={() => void handleSaveDraft()}
             >
-              Save as draft
+              {isEdit ? 'Save changes' : 'Save as draft'}
             </Button>
           </div>
         </div>

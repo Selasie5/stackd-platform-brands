@@ -19,20 +19,13 @@ export const Route = createFileRoute('/dashboard/overview')({
 
 function OverviewPage() {
   const { formatMoney } = useWallet()
-  const currentDate = formatDashboardDate(new Date())
 
   return (
     <div className="space-y-5 text-zinc-950">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-[-0.03em]">Hey, Fikri</h1>
-          <p className="mt-1 text-xs text-zinc-500">{currentDate}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
           <DashboardPill icon={Calendar}>This Month</DashboardPill>
           <DashboardPill icon={RefreshCw}>Compare: Last Month</DashboardPill>
           <DashboardPill icon={Edit3}>Edit Widget</DashboardPill>
-        </div>
       </div>
 
       <section className="grid overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] md:grid-cols-4">
@@ -130,22 +123,6 @@ function OverviewPage() {
       </section>
     </div>
   )
-}
-
-function formatDashboardDate(date: Date) {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).formatToParts(date)
-
-  const weekday = parts.find((part) => part.type === 'weekday')?.value
-  const day = parts.find((part) => part.type === 'day')?.value
-  const month = parts.find((part) => part.type === 'month')?.value
-  const year = parts.find((part) => part.type === 'year')?.value
-
-  return `${weekday}, ${day} ${month} ${year}`
 }
 
 function DashboardPill({
