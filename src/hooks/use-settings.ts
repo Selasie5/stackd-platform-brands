@@ -111,7 +111,6 @@ export function useChangePassword() {
 export function useActiveSessions() {
   return useQuery<{ activeSessions: ActiveSession[] }>(ACTIVE_SESSIONS_QUERY, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'ignore',
   })
 }
 
@@ -145,7 +144,6 @@ export function useNotificationPreferences() {
     NOTIFICATION_PREFERENCES_QUERY,
     {
       fetchPolicy: 'cache-and-network',
-      errorPolicy: 'ignore',
     }
   )
 }

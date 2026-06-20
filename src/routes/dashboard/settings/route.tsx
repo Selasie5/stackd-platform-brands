@@ -265,26 +265,30 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-x-5 gap-y-5">
-        <Field label="Brand name" required>
+        <Field label="Brand name" required id="brand-name">
           <Input
+            id="brand-name"
             value={form.brandName ?? ''}
             onChange={(e) => setForm((f) => ({ ...f, brandName: e.target.value }))}
           />
         </Field>
-        <Field label="Contact name" required>
+        <Field label="Contact name" required id="contact-name">
           <Input
+            id="contact-name"
             value={form.contactName ?? ''}
             onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
           />
         </Field>
-        <Field label="City">
+        <Field label="City" id="city">
           <Input
+            id="city"
             value={form.city ?? ''}
             onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
           />
         </Field>
-        <Field label="Country">
+        <Field label="Country" id="country">
           <Select
+            id="country"
             value={form.country ?? ''}
             onChange={(val) => setForm((f) => ({ ...f, country: val }))}
             options={COUNTRIES.map((c) => ({
@@ -295,24 +299,27 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
             placeholder="Select country"
           />
         </Field>
-        <Field label="Industry">
+        <Field label="Industry" id="industry">
           <Select
+            id="industry"
             value={form.industry ?? ''}
             onChange={(val) => setForm((f) => ({ ...f, industry: val }))}
             options={INDUSTRIES.map((ind) => ({ value: ind, label: ind }))}
             placeholder="Select industry"
           />
         </Field>
-        <Field label="Website">
+        <Field label="Website" id="website">
           <Input
+            id="website"
             placeholder="https://example.com"
             value={form.website ?? ''}
             onChange={(e) => setForm((f) => ({ ...f, website: e.target.value || null }))}
           />
         </Field>
       </div>
-      <Field label="Description">
+      <Field label="Description" id="description">
         <textarea
+          id="description"
           rows={3}
           value={form.description ?? ''}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
@@ -377,11 +384,16 @@ function NotificationTogglesPanel() {
 
   const current = prefs ?? data?.notificationPreferences ?? null
 
-  const toggle = (key: keyof NotificationPreferences) => {
+  const toggle = async (key: keyof NotificationPreferences) => {
     if (!current) return
+    const previous = current
     const next = { ...current, [key]: !current[key] }
     setPrefs(next)
-    updatePreferences(next)
+    try {
+      await updatePreferences(next)
+    } catch {
+      setPrefs(previous)
+    }
   }
 
   if (loading && !current) {
@@ -404,6 +416,7 @@ function NotificationTogglesPanel() {
               type="button"
               role="switch"
               aria-checked={current?.[item.key] ?? false}
+              aria-label={item.label}
               disabled={saving}
               onClick={() => toggle(item.key)}
               className={cn(
@@ -454,20 +467,23 @@ function ChangePasswordSection() {
   return (
     <SettingsCard title="Change password" description="Update your account password. You will need your current password.">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label="Current password">
+        <Field label="Current password" id="current-password">
           <PasswordInput
+            id="current-password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
           />
         </Field>
-        <Field label="New password">
+        <Field label="New password" id="new-password">
           <PasswordInput
+            id="new-password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
         </Field>
-        <Field label="Confirm new password">
+        <Field label="Confirm new password" id="confirm-new-password">
           <PasswordInput
+            id="confirm-new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -627,15 +643,17 @@ function Field({
   required,
   children,
   className,
+  id,
 }: {
   label: string
   required?: boolean
   children: ReactNode
   className?: string
+  id?: string
 }) {
   return (
     <div className={cn('space-y-1.5', className)}>
-      <Label className="text-xs font-medium text-zinc-700">
+      <Label htmlFor={id} className="text-xs font-medium text-zinc-700">
         {label}
         {required && <span className="ml-0.5 text-red-400">*</span>}
       </Label>
