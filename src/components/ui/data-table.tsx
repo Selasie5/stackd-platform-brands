@@ -125,7 +125,7 @@ export function DataTable<T>({
 
       <div
         className={cn(
-          'relative flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white',
+          'relative flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white',
           showEmptyState ? 'h-auto' : undefined
         )}
         style={showEmptyState ? undefined : { height: resolvedHeight }}

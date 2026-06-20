@@ -16,14 +16,14 @@ export function NewMessageModal({ open, onClose }: { open: boolean; onClose: () 
         role="dialog"
         aria-modal="true"
         aria-labelledby="new-message-title"
-        className="relative w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl"
+        className="relative w-full max-w-md rounded-lg border border-zinc-200/70 bg-white p-6 shadow-lg"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 id="new-message-title" className="text-lg font-semibold text-zinc-900">
+            <h2 id="new-message-title" className="text-sm font-semibold text-zinc-900">
               Start a new message
             </h2>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-xs text-zinc-500">
               Message a creator about an active campaign. Conversations are linked to UGC orders, CPM
               deals, and contests.
             </p>
@@ -38,9 +38,11 @@ export function NewMessageModal({ open, onClose }: { open: boolean; onClose: () 
           </button>
         </div>
 
-        <p className="mt-4 rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
-          Creator selection will be available once your campaigns have active creator submissions.
-        </p>
+        <div className="mt-4 rounded-md border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3">
+          <p className="text-sm text-zinc-500">
+            Creator selection will be available once your campaigns have active creator submissions.
+          </p>
+        </div>
 
         <div className="mt-6 flex justify-end">
           <Button type="button" variant="outline" onClick={onClose}>

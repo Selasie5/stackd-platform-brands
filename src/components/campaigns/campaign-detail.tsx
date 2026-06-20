@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ChevronLeft, Pencil } from 'lucide-react'
+import { ChevronLeft, CirclePause, CirclePlay, CircleStop, Pencil } from 'lucide-react'
 import type { OpportunityStatus } from '@/hooks/use-opportunities'
 import {
+  toOpportunityType,
   useContest,
   useCpmDeal,
+  useOpportunityTransitions,
   useUgcOrder,
 } from '@/hooks/use-opportunities'
 import type {
@@ -81,6 +83,95 @@ function formatDateTime(value: string) {
 
 function typeLabel(type: 'UGC' | 'CPM' | 'Contest') {
   return type === 'UGC' ? 'UGC Order' : type === 'CPM' ? 'CPM Deal' : 'Contest'
+}
+
+function isEditableCampaignStatus(status: OpportunityStatus) {
+  return status === 'draft' || status === 'pending_approval'
+}
+
+function CampaignDetailActions({
+  opportunityId,
+  opportunityType,
+  status,
+}: {
+  opportunityId: string
+  opportunityType: 'UGC' | 'CPM' | 'Contest'
+  status: OpportunityStatus
+}) {
+  const {
+    pauseOpportunity,
+    resumeOpportunity,
+    closeOpportunity,
+    loading: transitioning,
+  } = useOpportunityTransitions()
+
+  const backendType = toOpportunityType(opportunityType)
+
+  if (isEditableCampaignStatus(status)) {
+    return (
+      <Link
+        to="/dashboard/campaigns"
+        search={{ action: 'edit', campaign_type: opportunityType, opportunity_id: opportunityId }}
+      >
+        <Button variant="outline" size="sm">
+          <Pencil className="h-3.5 w-3.5" />
+          Edit campaign
+        </Button>
+      </Link>
+    )
+  }
+
+  if (status === 'live') {
+    return (
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => pauseOpportunity(backendType, opportunityId)}
+          isLoading={transitioning}
+        >
+          <CirclePause className="h-3.5 w-3.5" />
+          Pause
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => closeOpportunity(backendType, opportunityId)}
+          disabled={transitioning}
+        >
+          <CircleStop className="h-3.5 w-3.5" />
+          Close
+        </Button>
+      </div>
+    )
+  }
+
+  if (status === 'paused') {
+    return (
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => resumeOpportunity(backendType, opportunityId)}
+          isLoading={transitioning}
+        >
+          <CirclePlay className="h-3.5 w-3.5" />
+          Resume
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => closeOpportunity(backendType, opportunityId)}
+          disabled={transitioning}
+        >
+          <CircleStop className="h-3.5 w-3.5" />
+          Close
+        </Button>
+      </div>
+    )
+  }
+
+  return null
 }
 
 function UgcDetails({ detail }: { detail: UgcOrderDetail }) {
@@ -425,15 +516,11 @@ export function CampaignDetail({
           <ChevronLeft className="h-3 w-3" />
           Back to campaigns
         </Link>
-        <Link
-          to="/dashboard/campaigns"
-          search={{ action: 'edit', campaign_type: opportunityType, opportunity_id: opportunityId }}
-        >
-          <Button variant="outline" size="sm">
-            <Pencil className="h-3.5 w-3.5" />
-            Edit campaign
-          </Button>
-        </Link>
+        <CampaignDetailActions
+          opportunityId={opportunityId}
+          opportunityType={opportunityType}
+          status={detail.status}
+        />
       </div>
 
       <div>

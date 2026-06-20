@@ -7,7 +7,7 @@ export const Route = createFileRoute('/dashboard/messages')({
 
 function MessagesPage() {
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="flex min-h-full">
       <MessagesPanel />
     </div>
   )

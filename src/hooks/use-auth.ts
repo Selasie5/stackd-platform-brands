@@ -24,7 +24,15 @@ interface User {
   brand?: {
     id: string
     brandName: string
+    contactName?: string | null
+    city?: string | null
+    country: string
+    industry?: string | null
+    description?: string | null
+    website?: string | null
+    logoUrl?: string | null
     kycStatus: string
+    createdAt: string
   } | null
 }
 

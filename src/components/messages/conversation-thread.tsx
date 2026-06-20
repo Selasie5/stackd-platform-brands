@@ -32,7 +32,7 @@ function MessageBubble({
           className={cn(
             'rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
             isOwn
-              ? 'rounded-br-md bg-primary text-primary-foreground'
+              ? 'rounded-br-md bg-zinc-900 text-white'
               : 'rounded-bl-md bg-zinc-100 text-zinc-900',
             failed && 'ring-1 ring-red-200',
             sending && 'opacity-70'
@@ -58,7 +58,7 @@ function MessageBubble({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                  className="inline-flex items-center gap-1 font-medium text-zinc-900 hover:underline"
                 >
                   <RotateCcw className="h-3 w-3" />
                   Retry
@@ -72,7 +72,7 @@ function MessageBubble({
   )
 }
 
-export function MessageInput({
+function MessageInput({
   value,
   onChange,
   onSend,
@@ -90,7 +90,7 @@ export function MessageInput({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className="border-t border-zinc-200 bg-white px-4 py-3">
+    <div className="border-t border-zinc-200/70 bg-white px-4 py-3">
       <form
         className="flex items-end gap-2"
         onSubmit={(event) => {
@@ -177,9 +177,9 @@ export function ConversationThread({
 
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col bg-white">
-      <div className="border-b border-zinc-200 px-5 py-4">
+      <div className="border-b border-zinc-200/70 px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-white">
             {getInitials(conversation.creatorName)}
           </span>
           <div className="min-w-0">
@@ -187,13 +187,13 @@ export function ConversationThread({
               {conversation.creatorName}
             </h2>
             <p className="truncate text-xs text-zinc-500">
-              {formatReferenceLabel(conversation.referenceType)} · {conversation.campaignTitle}
+              {formatReferenceLabel(conversation.referenceType)} &middot; {conversation.campaignTitle}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto bg-zinc-50/30 px-5 py-4">
         {loading ? (
           <LoadingView label="Loading messages…" tone="primary" className="min-h-[240px] py-8" />
         ) : messages.length === 0 ? (
