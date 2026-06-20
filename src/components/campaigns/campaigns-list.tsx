@@ -1,11 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Briefcase, Expand, Eye, Pencil, Trophy, Video } from 'lucide-react'
-import type { OpportunityStatus } from '@/hooks/use-opportunities'
 import {
+  Briefcase,
+  CirclePause,
+  CirclePlay,
+  CircleStop,
+  Expand,
+  Eye,
+  Pencil,
+  Trophy,
+  Video,
+} from 'lucide-react'
+import type {
+  CampaignDisplayType,
+  OpportunityStatus,
+  OpportunityType,
+} from '@/hooks/use-opportunities'
+import {
+  toOpportunityType,
   useMyContests,
   useMyCpmDeals,
   useMyUgcOrders,
+  useOpportunityTransitions,
 } from '@/hooks/use-opportunities'
 import { CampaignsEmptyState } from '@/components/campaigns/campaigns-empty-state'
 import { Button } from '@/components/ui/button'
@@ -21,13 +37,15 @@ import { useWallet } from '@/contexts/wallet-context'
 
 type CampaignListItem = {
   id: string
-  type: 'UGC' | 'CPM' | 'Contest'
+  type: CampaignDisplayType
   title: string
   productName: string
   status: OpportunityStatus
   budget: number
   createdAt: string
 }
+
+type CampaignTransitionAction = (type: OpportunityType, id: string) => Promise<unknown>
 
 const CAMPAIGN_STATUS_STYLES: Record<
   OpportunityStatus,
@@ -99,9 +117,22 @@ function formatDate(value: string) {
   })
 }
 
+function isEditableCampaignStatus(status: OpportunityStatus) {
+  return status === 'draft' || status === 'pending_approval'
+}
+
+const ACTION_BUTTON_CLASS =
+  'rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-not-allowed disabled:opacity-40'
+
 function buildCampaignColumns(
   formatMoney: (amount: number) => string,
-  navigate: ReturnType<typeof useNavigate>
+  navigate: ReturnType<typeof useNavigate>,
+  actions: {
+    pauseOpportunity: CampaignTransitionAction
+    resumeOpportunity: CampaignTransitionAction
+    closeOpportunity: CampaignTransitionAction
+    transitioning: boolean
+  }
 ): DataTableColumn<CampaignListItem>[] {
   return [
     {
@@ -166,58 +197,129 @@ function buildCampaignColumns(
     {
       id: 'actions',
       header: '',
-      cell: (row) => (
-        <div className="flex items-center gap-1">
-          <Tooltip content="View campaign">
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: '/dashboard/campaigns',
-                  search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
-                })
-              }
-              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
-            >
-              <Eye className="h-4 w-4" />
-            </button>
-          </Tooltip>
-          <Tooltip content="Edit campaign">
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: '/dashboard/campaigns',
-                  search: { action: 'edit', campaign_type: row.type, opportunity_id: row.id },
-                })
-              }
-              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          </Tooltip>
-          <Tooltip content="Open detail view">
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: '/dashboard/campaigns',
-                  search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
-                })
-              }
-              className="rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
-            >
-              <Expand className="h-4 w-4" />
-            </button>
-          </Tooltip>
-        </div>
-      ),
+      cell: (row) => {
+        const backendType = toOpportunityType(row.type)
+
+        return (
+          <div className="flex items-center gap-1">
+            <Tooltip content="View campaign">
+              <button
+                type="button"
+                aria-label="View campaign"
+                onClick={() =>
+                  navigate({
+                    to: '/dashboard/campaigns',
+                    search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                  })
+                }
+                className={ACTION_BUTTON_CLASS}
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+            </Tooltip>
+
+            {isEditableCampaignStatus(row.status) && (
+              <Tooltip content="Edit campaign">
+                <button
+                  type="button"
+                  aria-label="Edit campaign"
+                  onClick={() =>
+                    navigate({
+                      to: '/dashboard/campaigns',
+                      search: { action: 'edit', campaign_type: row.type, opportunity_id: row.id },
+                    })
+                  }
+                  className={ACTION_BUTTON_CLASS}
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            )}
+
+            {row.status === 'live' && (
+              <>
+                <Tooltip content="Pause campaign">
+                  <button
+                    type="button"
+                    aria-label="Pause campaign"
+                    onClick={() => actions.pauseOpportunity(backendType, row.id)}
+                    disabled={actions.transitioning}
+                    className={ACTION_BUTTON_CLASS}
+                  >
+                    <CirclePause className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Close campaign">
+                  <button
+                    type="button"
+                    aria-label="Close campaign"
+                    onClick={() => actions.closeOpportunity(backendType, row.id)}
+                    disabled={actions.transitioning}
+                    className={ACTION_BUTTON_CLASS}
+                  >
+                    <CircleStop className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+              </>
+            )}
+
+            {row.status === 'paused' && (
+              <>
+                <Tooltip content="Resume campaign">
+                  <button
+                    type="button"
+                    aria-label="Resume campaign"
+                    onClick={() => actions.resumeOpportunity(backendType, row.id)}
+                    disabled={actions.transitioning}
+                    className={ACTION_BUTTON_CLASS}
+                  >
+                    <CirclePlay className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Close campaign">
+                  <button
+                    type="button"
+                    aria-label="Close campaign"
+                    onClick={() => actions.closeOpportunity(backendType, row.id)}
+                    disabled={actions.transitioning}
+                    className={ACTION_BUTTON_CLASS}
+                  >
+                    <CircleStop className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+              </>
+            )}
+
+            <Tooltip content="Open detail view">
+              <button
+                type="button"
+                aria-label="Open detail view"
+                onClick={() =>
+                  navigate({
+                    to: '/dashboard/campaigns',
+                    search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                  })
+                }
+                className={ACTION_BUTTON_CLASS}
+              >
+                <Expand className="h-4 w-4" />
+              </button>
+            </Tooltip>
+          </div>
+        )
+      },
     },
   ]
 }
 
 export function CampaignsList() {
   const { formatMoney } = useWallet()
+  const {
+    pauseOpportunity,
+    resumeOpportunity,
+    closeOpportunity,
+    loading: transitioningCampaign,
+  } = useOpportunityTransitions()
   const ugcQuery = useMyUgcOrders()
   const cpmQuery = useMyCpmDeals()
   const contestQuery = useMyContests()
@@ -269,7 +371,23 @@ export function CampaignsList() {
 
   const navigate = useNavigate()
 
-  const columns = useMemo(() => buildCampaignColumns(formatMoney, navigate), [formatMoney, navigate])
+  const columns = useMemo(
+    () =>
+      buildCampaignColumns(formatMoney, navigate, {
+        pauseOpportunity,
+        resumeOpportunity,
+        closeOpportunity,
+        transitioning: transitioningCampaign,
+      }),
+    [
+      closeOpportunity,
+      formatMoney,
+      navigate,
+      pauseOpportunity,
+      resumeOpportunity,
+      transitioningCampaign,
+    ]
+  )
 
   const filtered = useMemo(() => {
     let rows = [...campaigns]

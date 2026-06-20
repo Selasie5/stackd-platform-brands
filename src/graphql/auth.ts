@@ -12,7 +12,15 @@ export const ME_QUERY = gql`
       brand {
         id
         brandName
+        contactName
+        city
+        country
+        industry
+        description
+        website
+        logoUrl
         kycStatus
+        createdAt
       }
     }
   }

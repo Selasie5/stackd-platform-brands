@@ -33,8 +33,8 @@ export function ConversationList({
   }, [conversations, query])
 
   return (
-    <div className="flex h-full min-w-0 flex-col border-r border-zinc-200 bg-zinc-50/60">
-      <div className="border-b border-zinc-200 bg-white px-4 py-4">
+    <div className="flex h-full min-w-0 flex-col">
+      <div className="border-b border-zinc-200/70 px-4 py-4">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <Input
@@ -59,7 +59,7 @@ export function ConversationList({
             />
           </div>
         ) : (
-          <ul className="divide-y divide-zinc-200">
+          <ul className="divide-y divide-zinc-100">
             {filtered.map((conversation) => {
               const isSelected = conversation.id === selectedId
 
@@ -69,11 +69,11 @@ export function ConversationList({
                     type="button"
                     onClick={() => onSelect(conversation)}
                     className={cn(
-                      'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors',
-                      isSelected ? 'bg-white' : 'hover:bg-white/80'
+                      'flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors',
+                      isSelected ? 'bg-zinc-50' : 'hover:bg-zinc-50/60'
                     )}
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-xs font-semibold text-white">
                       {getInitials(conversation.creatorName)}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -86,11 +86,14 @@ export function ConversationList({
                         </span>
                       </span>
                       <span className="mt-0.5 block truncate text-xs text-zinc-500">
+                        {conversation.campaignTitle}
+                      </span>
+                      <span className="mt-0.5 block truncate text-xs text-zinc-400">
                         {conversation.lastMessagePreview}
                       </span>
                     </span>
                     {conversation.unreadCount > 0 ? (
-                      <span className="mt-1 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-white">
+                      <span className="mt-1 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-zinc-900 px-1.5 text-[10px] font-semibold text-white">
                         {conversation.unreadCount}
                       </span>
                     ) : null}

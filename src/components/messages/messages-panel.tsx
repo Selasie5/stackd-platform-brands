@@ -140,16 +140,18 @@ export function MessagesPanel() {
 
   if (conversations.length === 0) {
     return (
-      <EmptyState
-        title="No conversations yet"
-        description="When creators engage with your campaigns, your message threads will appear here."
-      />
+      <div className="flex min-h-full items-center justify-center">
+        <EmptyState
+          title="No conversations yet"
+          description="When creators engage with your campaigns, your message threads will appear here."
+        />
+      </div>
     )
   }
 
   return (
-    <div className="-mx-6 -mb-6 flex h-[calc(100dvh-3.5rem-3rem)] overflow-hidden border-t border-zinc-200">
-      <div className="w-full max-w-sm shrink-0">
+    <div className="flex min-h-full flex-1 overflow-hidden rounded-lg border border-zinc-200/70 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="w-80 shrink-0 border-r border-zinc-200/70">
         <ConversationList
           conversations={conversations}
           selectedId={selected?.id}

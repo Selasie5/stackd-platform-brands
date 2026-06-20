@@ -3,12 +3,15 @@ import { toast } from 'sonner'
 import {
   CONTEST_QUERY,
   CPM_DEAL_QUERY,
+  CLOSE_OPPORTUNITY_MUTATION,
   CREATE_CONTEST_MUTATION,
   CREATE_CPM_DEAL_MUTATION,
   CREATE_UGC_ORDER_MUTATION,
   MY_CONTESTS_QUERY,
   MY_CPM_DEALS_QUERY,
   MY_UGC_ORDERS_QUERY,
+  PAUSE_OPPORTUNITY_MUTATION,
+  RESUME_OPPORTUNITY_MUTATION,
   SUBMIT_OPPORTUNITY_FOR_APPROVAL_MUTATION,
   UGC_ORDER_QUERY,
   UPDATE_CONTEST_MUTATION,
@@ -28,6 +31,15 @@ export type OpportunityStatus =
   | 'completed'
 
 export type OpportunityType = 'UGC_ORDER' | 'CPM_DEAL' | 'CONTEST'
+export type CampaignDisplayType = 'UGC' | 'CPM' | 'Contest'
+
+type OpportunityTransitionResult = { id: string; status: OpportunityStatus }
+
+export function toOpportunityType(type: CampaignDisplayType): OpportunityType {
+  if (type === 'UGC') return 'UGC_ORDER'
+  if (type === 'CPM') return 'CPM_DEAL'
+  return 'CONTEST'
+}
 
 export interface OpportunitySummary {
   id: string
@@ -271,7 +283,7 @@ export function useCreateContest() {
 
 export function useSubmitOpportunityForApproval() {
   const [submitMutation, { loading }] = useMutation<
-    { submitOpportunityForApproval: { id: string; status: OpportunityStatus } },
+    { submitOpportunityForApproval: OpportunityTransitionResult },
     { type: OpportunityType; id: string }
   >(SUBMIT_OPPORTUNITY_FOR_APPROVAL_MUTATION, {
     refetchQueries: opportunityListRefetchQueries,
@@ -291,4 +303,73 @@ export function useSubmitOpportunityForApproval() {
   }
 
   return { submitForApproval, loading }
+}
+
+export function useOpportunityTransitions() {
+  const [pauseMutation, { loading: pausing }] = useMutation<
+    { pauseOpportunity: OpportunityTransitionResult },
+    { type: OpportunityType; id: string }
+  >(PAUSE_OPPORTUNITY_MUTATION, {
+    refetchQueries: opportunityListRefetchQueries,
+  })
+
+  const [resumeMutation, { loading: resuming }] = useMutation<
+    { resumeOpportunity: OpportunityTransitionResult },
+    { type: OpportunityType; id: string }
+  >(RESUME_OPPORTUNITY_MUTATION, {
+    refetchQueries: opportunityListRefetchQueries,
+  })
+
+  const [closeMutation, { loading: closing }] = useMutation<
+    { closeOpportunity: OpportunityTransitionResult },
+    { type: OpportunityType; id: string }
+  >(CLOSE_OPPORTUNITY_MUTATION, {
+    refetchQueries: opportunityListRefetchQueries,
+  })
+
+  const pauseOpportunity = async (type: OpportunityType, id: string) => {
+    try {
+      const { data } = await pauseMutation({ variables: { type, id } })
+      if (data?.pauseOpportunity) {
+        toast.success('Campaign paused.')
+        return data.pauseOpportunity
+      }
+    } catch (err) {
+      toast.error(extractGqlError(err))
+    }
+    return null
+  }
+
+  const resumeOpportunity = async (type: OpportunityType, id: string) => {
+    try {
+      const { data } = await resumeMutation({ variables: { type, id } })
+      if (data?.resumeOpportunity) {
+        toast.success('Campaign resumed.')
+        return data.resumeOpportunity
+      }
+    } catch (err) {
+      toast.error(extractGqlError(err))
+    }
+    return null
+  }
+
+  const closeOpportunity = async (type: OpportunityType, id: string) => {
+    try {
+      const { data } = await closeMutation({ variables: { type, id } })
+      if (data?.closeOpportunity) {
+        toast.success('Campaign closed.')
+        return data.closeOpportunity
+      }
+    } catch (err) {
+      toast.error(extractGqlError(err))
+    }
+    return null
+  }
+
+  return {
+    pauseOpportunity,
+    resumeOpportunity,
+    closeOpportunity,
+    loading: pausing || resuming || closing,
+  }
 }

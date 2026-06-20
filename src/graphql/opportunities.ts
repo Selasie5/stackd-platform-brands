@@ -244,3 +244,42 @@ export const SUBMIT_OPPORTUNITY_FOR_APPROVAL_MUTATION = gql`
     }
   }
 `
+
+const opportunityTransitionFields = `
+  ... on UgcOrder {
+    id
+    status
+  }
+  ... on CpmDeal {
+    id
+    status
+  }
+  ... on Contest {
+    id
+    status
+  }
+`
+
+export const PAUSE_OPPORTUNITY_MUTATION = gql`
+  mutation PauseOpportunity($type: OpportunityType!, $id: ID!) {
+    pauseOpportunity(type: $type, id: $id) {
+      ${opportunityTransitionFields}
+    }
+  }
+`
+
+export const RESUME_OPPORTUNITY_MUTATION = gql`
+  mutation ResumeOpportunity($type: OpportunityType!, $id: ID!) {
+    resumeOpportunity(type: $type, id: $id) {
+      ${opportunityTransitionFields}
+    }
+  }
+`
+
+export const CLOSE_OPPORTUNITY_MUTATION = gql`
+  mutation CloseOpportunity($type: OpportunityType!, $id: ID!) {
+    closeOpportunity(type: $type, id: $id) {
+      ${opportunityTransitionFields}
+    }
+  }
+`
