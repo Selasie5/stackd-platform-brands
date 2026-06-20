@@ -205,6 +205,7 @@ function buildCampaignColumns(
             <Tooltip content="View campaign">
               <button
                 type="button"
+                aria-label="View campaign"
                 onClick={() =>
                   navigate({
                     to: '/dashboard/campaigns',
@@ -221,6 +222,7 @@ function buildCampaignColumns(
               <Tooltip content="Edit campaign">
                 <button
                   type="button"
+                  aria-label="Edit campaign"
                   onClick={() =>
                     navigate({
                       to: '/dashboard/campaigns',
@@ -239,6 +241,7 @@ function buildCampaignColumns(
                 <Tooltip content="Pause campaign">
                   <button
                     type="button"
+                    aria-label="Pause campaign"
                     onClick={() => actions.pauseOpportunity(backendType, row.id)}
                     disabled={actions.transitioning}
                     className={ACTION_BUTTON_CLASS}
@@ -249,6 +252,7 @@ function buildCampaignColumns(
                 <Tooltip content="Close campaign">
                   <button
                     type="button"
+                    aria-label="Close campaign"
                     onClick={() => actions.closeOpportunity(backendType, row.id)}
                     disabled={actions.transitioning}
                     className={ACTION_BUTTON_CLASS}
@@ -264,6 +268,7 @@ function buildCampaignColumns(
                 <Tooltip content="Resume campaign">
                   <button
                     type="button"
+                    aria-label="Resume campaign"
                     onClick={() => actions.resumeOpportunity(backendType, row.id)}
                     disabled={actions.transitioning}
                     className={ACTION_BUTTON_CLASS}
@@ -274,6 +279,7 @@ function buildCampaignColumns(
                 <Tooltip content="Close campaign">
                   <button
                     type="button"
+                    aria-label="Close campaign"
                     onClick={() => actions.closeOpportunity(backendType, row.id)}
                     disabled={actions.transitioning}
                     className={ACTION_BUTTON_CLASS}
@@ -287,6 +293,7 @@ function buildCampaignColumns(
             <Tooltip content="Open detail view">
               <button
                 type="button"
+                aria-label="Open detail view"
                 onClick={() =>
                   navigate({
                     to: '/dashboard/campaigns',

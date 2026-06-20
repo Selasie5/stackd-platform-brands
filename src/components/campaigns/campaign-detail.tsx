@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { ChevronLeft, CirclePause, CirclePlay, CircleStop, Pencil } from 'lucide-react'
-import type { OpportunityStatus } from '@/hooks/use-opportunities'
 import {
   toOpportunityType,
   useContest,
@@ -12,6 +11,7 @@ import {
 import type {
   ContestDetail,
   CpmDealDetail,
+  OpportunityStatus,
   UgcOrderDetail,
 } from '@/hooks/use-opportunities'
 import { Button } from '@/components/ui/button'

@@ -93,9 +93,12 @@ export function useChangePassword() {
 
   const changePassword = async (currentPassword: string, newPassword: string) => {
     try {
-      await mutation({ variables: { currentPassword, newPassword } })
-      toast.success('Password changed successfully.')
-      return true
+      const result = await mutation({ variables: { currentPassword, newPassword } })
+      if (result.data?.changePassword) {
+        toast.success('Password changed successfully.')
+        return true
+      }
+      return false
     } catch (err) {
       toast.error(extractGqlError(err))
       return false
@@ -122,9 +125,12 @@ export function useRevokeSession() {
 
   const revokeSession = async (sessionId: string) => {
     try {
-      await mutation({ variables: { sessionId } })
-      toast.success('Session revoked successfully.')
-      return true
+      const result = await mutation({ variables: { sessionId } })
+      if (result.data?.revokeSession) {
+        toast.success('Session revoked successfully.')
+        return true
+      }
+      return false
     } catch (err) {
       toast.error(extractGqlError(err))
       return false
@@ -154,9 +160,12 @@ export function useUpdateNotificationPreferences() {
 
   const updatePreferences = async (input: Partial<NotificationPreferences>) => {
     try {
-      await mutation({ variables: { input } })
-      toast.success('Notification preferences updated.')
-      return true
+      const result = await mutation({ variables: { input } })
+      if (result.data?.updateNotificationPreferences) {
+        toast.success('Notification preferences updated.')
+        return true
+      }
+      return false
     } catch (err) {
       toast.error(extractGqlError(err))
       return false
