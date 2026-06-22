@@ -209,7 +209,7 @@ function buildCampaignColumns(
                 onClick={() =>
                   navigate({
                     to: '/dashboard/campaigns',
-                    search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                    search: { action: 'expand', opportunity_id: row.id, opportunity_type: row.type, campaign_title: row.title },
                   })
                 }
                 className={ACTION_BUTTON_CLASS}
@@ -223,12 +223,12 @@ function buildCampaignColumns(
                 <button
                   type="button"
                   aria-label="Edit campaign"
-                  onClick={() =>
-                    navigate({
-                      to: '/dashboard/campaigns',
-                      search: { action: 'edit', campaign_type: row.type, opportunity_id: row.id },
-                    })
-                  }
+                onClick={() =>
+                  navigate({
+                    to: '/dashboard/campaigns',
+                    search: { action: 'edit', campaign_type: row.type, opportunity_id: row.id, campaign_title: row.title },
+                  })
+                }
                   className={ACTION_BUTTON_CLASS}
                 >
                   <Pencil className="h-4 w-4" />
@@ -297,7 +297,7 @@ function buildCampaignColumns(
                 onClick={() =>
                   navigate({
                     to: '/dashboard/campaigns',
-                    search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type },
+                    search: { action: 'view', opportunity_id: row.id, opportunity_type: row.type, campaign_title: row.title },
                   })
                 }
                 className={ACTION_BUTTON_CLASS}

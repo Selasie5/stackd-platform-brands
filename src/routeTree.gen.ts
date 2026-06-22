@@ -13,6 +13,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SigninRouteRouteImport } from './routes/signin/route'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardMockDemoRouteImport } from './routes/dashboard/mock-demo'
 import { Route as DashboardWalletRouteRouteImport } from './routes/dashboard/wallet/route'
 import { Route as DashboardSubmissionsRouteRouteImport } from './routes/dashboard/submissions/route'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
@@ -21,6 +22,9 @@ import { Route as DashboardMessagesRouteRouteImport } from './routes/dashboard/m
 import { Route as DashboardCreatorsRouteRouteImport } from './routes/dashboard/creators/route'
 import { Route as DashboardContestBoardRouteRouteImport } from './routes/dashboard/contest-board/route'
 import { Route as DashboardCampaignsRouteRouteImport } from './routes/dashboard/campaigns/route'
+import { Route as DashboardSubmissionsIdRouteRouteImport } from './routes/dashboard/submissions/$id/route'
+import { Route as DashboardCampaignsIdSelectWinnersRouteRouteImport } from './routes/dashboard/campaigns/$id/select-winners/route'
+import { Route as DashboardCampaignsIdBoardRouteRouteImport } from './routes/dashboard/campaigns/$id/board/route'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -41,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardMockDemoRoute = DashboardMockDemoRouteImport.update({
+  id: '/mock-demo',
+  path: '/mock-demo',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardWalletRouteRoute = DashboardWalletRouteRouteImport.update({
   id: '/wallet',
@@ -84,34 +93,60 @@ const DashboardCampaignsRouteRoute = DashboardCampaignsRouteRouteImport.update({
   path: '/campaigns',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSubmissionsIdRouteRoute =
+  DashboardSubmissionsIdRouteRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => DashboardSubmissionsRouteRoute,
+  } as any)
+const DashboardCampaignsIdSelectWinnersRouteRoute =
+  DashboardCampaignsIdSelectWinnersRouteRouteImport.update({
+    id: '/$id/select-winners',
+    path: '/$id/select-winners',
+    getParentRoute: () => DashboardCampaignsRouteRoute,
+  } as any)
+const DashboardCampaignsIdBoardRouteRoute =
+  DashboardCampaignsIdBoardRouteRouteImport.update({
+    id: '/$id/board',
+    path: '/$id/board',
+    getParentRoute: () => DashboardCampaignsRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRoute
   '/signin': typeof SigninRouteRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRouteWithChildren
   '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
   '/dashboard/creators': typeof DashboardCreatorsRouteRoute
   '/dashboard/messages': typeof DashboardMessagesRouteRoute
   '/dashboard/overview': typeof DashboardOverviewRouteRoute
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
-  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
+  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
+  '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
+  '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
+  '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/register': typeof RegisterRouteRoute
   '/signin': typeof SigninRouteRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRouteWithChildren
   '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
   '/dashboard/creators': typeof DashboardCreatorsRouteRoute
   '/dashboard/messages': typeof DashboardMessagesRouteRoute
   '/dashboard/overview': typeof DashboardOverviewRouteRoute
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
-  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
+  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
+  '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
+  '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
+  '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -119,14 +154,18 @@ export interface FileRoutesById {
   '/register': typeof RegisterRouteRoute
   '/signin': typeof SigninRouteRoute
   '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/campaigns': typeof DashboardCampaignsRouteRoute
+  '/dashboard/campaigns': typeof DashboardCampaignsRouteRouteWithChildren
   '/dashboard/contest-board': typeof DashboardContestBoardRouteRoute
   '/dashboard/creators': typeof DashboardCreatorsRouteRoute
   '/dashboard/messages': typeof DashboardMessagesRouteRoute
   '/dashboard/overview': typeof DashboardOverviewRouteRoute
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
-  '/dashboard/submissions': typeof DashboardSubmissionsRouteRoute
+  '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
+  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
+  '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
+  '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
+  '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,6 +182,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
+    | '/dashboard/mock-demo'
+    | '/dashboard/submissions/$id'
+    | '/dashboard/campaigns/$id/board'
+    | '/dashboard/campaigns/$id/select-winners'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -157,6 +200,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
+    | '/dashboard/mock-demo'
+    | '/dashboard/submissions/$id'
+    | '/dashboard/campaigns/$id/board'
+    | '/dashboard/campaigns/$id/select-winners'
   id:
     | '__root__'
     | '/'
@@ -171,6 +218,10 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
+    | '/dashboard/mock-demo'
+    | '/dashboard/submissions/$id'
+    | '/dashboard/campaigns/$id/board'
+    | '/dashboard/campaigns/$id/select-winners'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,6 +260,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/mock-demo': {
+      id: '/dashboard/mock-demo'
+      path: '/mock-demo'
+      fullPath: '/dashboard/mock-demo'
+      preLoaderRoute: typeof DashboardMockDemoRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/dashboard/wallet': {
       id: '/dashboard/wallet'
@@ -266,29 +324,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCampaignsRouteRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/submissions/$id': {
+      id: '/dashboard/submissions/$id'
+      path: '/$id'
+      fullPath: '/dashboard/submissions/$id'
+      preLoaderRoute: typeof DashboardSubmissionsIdRouteRouteImport
+      parentRoute: typeof DashboardSubmissionsRouteRoute
+    }
+    '/dashboard/campaigns/$id/select-winners': {
+      id: '/dashboard/campaigns/$id/select-winners'
+      path: '/$id/select-winners'
+      fullPath: '/dashboard/campaigns/$id/select-winners'
+      preLoaderRoute: typeof DashboardCampaignsIdSelectWinnersRouteRouteImport
+      parentRoute: typeof DashboardCampaignsRouteRoute
+    }
+    '/dashboard/campaigns/$id/board': {
+      id: '/dashboard/campaigns/$id/board'
+      path: '/$id/board'
+      fullPath: '/dashboard/campaigns/$id/board'
+      preLoaderRoute: typeof DashboardCampaignsIdBoardRouteRouteImport
+      parentRoute: typeof DashboardCampaignsRouteRoute
+    }
   }
 }
 
+interface DashboardCampaignsRouteRouteChildren {
+  DashboardCampaignsIdBoardRouteRoute: typeof DashboardCampaignsIdBoardRouteRoute
+  DashboardCampaignsIdSelectWinnersRouteRoute: typeof DashboardCampaignsIdSelectWinnersRouteRoute
+}
+
+const DashboardCampaignsRouteRouteChildren: DashboardCampaignsRouteRouteChildren =
+  {
+    DashboardCampaignsIdBoardRouteRoute: DashboardCampaignsIdBoardRouteRoute,
+    DashboardCampaignsIdSelectWinnersRouteRoute:
+      DashboardCampaignsIdSelectWinnersRouteRoute,
+  }
+
+const DashboardCampaignsRouteRouteWithChildren =
+  DashboardCampaignsRouteRoute._addFileChildren(
+    DashboardCampaignsRouteRouteChildren,
+  )
+
+interface DashboardSubmissionsRouteRouteChildren {
+  DashboardSubmissionsIdRouteRoute: typeof DashboardSubmissionsIdRouteRoute
+}
+
+const DashboardSubmissionsRouteRouteChildren: DashboardSubmissionsRouteRouteChildren =
+  {
+    DashboardSubmissionsIdRouteRoute: DashboardSubmissionsIdRouteRoute,
+  }
+
+const DashboardSubmissionsRouteRouteWithChildren =
+  DashboardSubmissionsRouteRoute._addFileChildren(
+    DashboardSubmissionsRouteRouteChildren,
+  )
+
 interface DashboardRouteChildren {
-  DashboardCampaignsRouteRoute: typeof DashboardCampaignsRouteRoute
+  DashboardCampaignsRouteRoute: typeof DashboardCampaignsRouteRouteWithChildren
   DashboardContestBoardRouteRoute: typeof DashboardContestBoardRouteRoute
   DashboardCreatorsRouteRoute: typeof DashboardCreatorsRouteRoute
   DashboardMessagesRouteRoute: typeof DashboardMessagesRouteRoute
   DashboardOverviewRouteRoute: typeof DashboardOverviewRouteRoute
   DashboardSettingsRouteRoute: typeof DashboardSettingsRouteRoute
-  DashboardSubmissionsRouteRoute: typeof DashboardSubmissionsRouteRoute
+  DashboardSubmissionsRouteRoute: typeof DashboardSubmissionsRouteRouteWithChildren
   DashboardWalletRouteRoute: typeof DashboardWalletRouteRoute
+  DashboardMockDemoRoute: typeof DashboardMockDemoRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardCampaignsRouteRoute: DashboardCampaignsRouteRoute,
+  DashboardCampaignsRouteRoute: DashboardCampaignsRouteRouteWithChildren,
   DashboardContestBoardRouteRoute: DashboardContestBoardRouteRoute,
   DashboardCreatorsRouteRoute: DashboardCreatorsRouteRoute,
   DashboardMessagesRouteRoute: DashboardMessagesRouteRoute,
   DashboardOverviewRouteRoute: DashboardOverviewRouteRoute,
   DashboardSettingsRouteRoute: DashboardSettingsRouteRoute,
-  DashboardSubmissionsRouteRoute: DashboardSubmissionsRouteRoute,
+  DashboardSubmissionsRouteRoute: DashboardSubmissionsRouteRouteWithChildren,
   DashboardWalletRouteRoute: DashboardWalletRouteRoute,
+  DashboardMockDemoRoute: DashboardMockDemoRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

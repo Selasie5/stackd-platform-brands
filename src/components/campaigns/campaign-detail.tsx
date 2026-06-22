@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, CirclePause, CirclePlay, CircleStop, Pencil } from 'lucide-react'
 import {
   toOpportunityType,
@@ -21,6 +21,8 @@ import { DotBadge } from '@/components/ui/dot-badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { LoadingView } from '@/components/ui/view-state'
 import { useWallet } from '@/contexts/wallet-context'
+import { ContestBoardTabContent } from '@/components/contest-board/contest-board-tab-content'
+import { useContestSubmissions } from '@/hooks/use-contest-board'
 
 const CAMPAIGN_STATUS_STYLES: Record<
   OpportunityStatus,
@@ -441,14 +443,9 @@ function SubmissionsTab() {
   )
 }
 
-function ContestBoardTab() {
-  return (
-    <EmptyState
-      title="Contest board"
-      description="Track ranked creator entries and leaderboard standings here once submissions come in."
-      compact
-    />
-  )
+function ContestBoardTab({ opportunityId, opportunityType }: { opportunityId: string; opportunityType: string }) {
+  if (opportunityType !== 'Contest') return null
+  return <ContestBoardTabContent contestId={opportunityId} />
 }
 
 function AnalyticsTab() {
@@ -464,21 +461,59 @@ function AnalyticsTab() {
 export function CampaignDetail({
   opportunityId,
   opportunityType,
+  defaultTab,
 }: {
   opportunityId: string
   opportunityType: 'UGC' | 'CPM' | 'Contest'
+  defaultTab?: 'general' | 'submissions' | 'contest-board' | 'analytics'
 }) {
   const { formatMoney } = useWallet()
+  const navigate = useNavigate()
 
   const ugcQuery = useUgcOrder(opportunityType === 'UGC' ? opportunityId : undefined)
   const cpmQuery = useCpmDeal(opportunityType === 'CPM' ? opportunityId : undefined)
   const contestQuery = useContest(opportunityType === 'Contest' ? opportunityId : undefined)
 
+  const contestSubmissionQuery = useContestSubmissions(opportunityType === 'Contest' ? opportunityId : undefined)
+  const contestSubmissionCount = contestSubmissionQuery.data?.contestSubmissions?.length ?? 0
+
   const loading = ugcQuery.loading || cpmQuery.loading || contestQuery.loading
   const detail =
     ugcQuery.data?.ugcOrder ?? cpmQuery.data?.cpmDeal ?? contestQuery.data?.contest
 
-  const [activeTab, setActiveTab] = useState<'general' | 'submissions' | 'contest-board' | 'analytics'>('general')
+  type CampaignTab = 'general' | 'submissions' | 'contest-board' | 'analytics'
+  const [activeTab, setActiveTab] = useState<CampaignTab>(defaultTab ?? 'general')
+  const hasSyncedTitle = useRef(false)
+
+  useEffect(() => {
+    if (detail?.title && !hasSyncedTitle.current) {
+      hasSyncedTitle.current = true
+      navigate({
+        to: '/dashboard/campaigns',
+        search: {
+          action: 'view',
+          opportunity_id: opportunityId,
+          opportunity_type: opportunityType,
+          tab: activeTab,
+          campaign_title: detail.title,
+        },
+      })
+    }
+  }, [detail?.title])
+
+  const handleTabChange = (tab: CampaignTab) => {
+    setActiveTab(tab)
+    navigate({
+      to: '/dashboard/campaigns',
+      search: {
+        action: 'view',
+        opportunity_id: opportunityId,
+        opportunity_type: opportunityType,
+        tab,
+        campaign_title: detail?.title,
+      },
+    })
+  }
 
   if (loading && !detail) {
     return <LoadingView label="Loading campaign…" tone="primary" />
@@ -502,7 +537,7 @@ export function CampaignDetail({
   const tabs: Tab<'general' | 'submissions' | 'contest-board' | 'analytics'>[] = [
     { id: 'general', label: 'General details', content: <GeneralTab detail={detail} opportunityType={opportunityType} formatMoney={formatMoney} /> },
     { id: 'submissions', label: 'Submissions', content: <SubmissionsTab /> },
-    ...(opportunityType === 'Contest' ? [{ id: 'contest-board' as const, label: 'Contest board', content: <ContestBoardTab /> }] : []),
+    ...(opportunityType === 'Contest' ? [{ id: 'contest-board' as const, label: 'Contest board', badge: contestSubmissionCount, content: <ContestBoardTab opportunityId={opportunityId} opportunityType={opportunityType} /> }] : []),
     { id: 'analytics', label: 'Analytics', content: <AnalyticsTab /> },
   ]
 
@@ -531,7 +566,74 @@ export function CampaignDetail({
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white px-6 py-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+        <Tabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />
+      </div>
+    </div>
+  )
+}
+
+export function CampaignExpandedView({
+  opportunityId,
+  opportunityType,
+}: {
+  opportunityId: string
+  opportunityType: 'UGC' | 'CPM' | 'Contest'
+}) {
+  const { formatMoney } = useWallet()
+
+  const ugcQuery = useUgcOrder(opportunityType === 'UGC' ? opportunityId : undefined)
+  const cpmQuery = useCpmDeal(opportunityType === 'CPM' ? opportunityId : undefined)
+  const contestQuery = useContest(opportunityType === 'Contest' ? opportunityId : undefined)
+
+  const loading = ugcQuery.loading || cpmQuery.loading || contestQuery.loading
+  const detail =
+    ugcQuery.data?.ugcOrder ?? cpmQuery.data?.cpmDeal ?? contestQuery.data?.contest
+
+  if (loading && !detail) {
+    return <LoadingView label="Loading campaign…" tone="primary" />
+  }
+
+  if (!detail) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <Link
+          to="/dashboard/campaigns"
+          className="inline-flex w-fit items-center gap-1 rounded-full bg-zinc-100 px-3 py-1.5 text-[11px] font-semibold text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
+        >
+          <ChevronLeft className="h-3 w-3" />
+          Back to campaigns
+        </Link>
+        <p className="text-sm text-zinc-500">Campaign not found.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <Link
+          to="/dashboard/campaigns"
+          className="inline-flex w-fit items-center gap-1 rounded-full bg-zinc-100 px-3 py-1.5 text-[11px] font-semibold text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
+        >
+          <ChevronLeft className="h-3 w-3" />
+          Back to campaigns
+        </Link>
+        <CampaignDetailActions
+          opportunityId={opportunityId}
+          opportunityType={opportunityType}
+          status={detail.status}
+        />
+      </div>
+
+      <div>
+        <h1 className="text-2xl font-semibold tracking-[-0.03em] text-zinc-900">
+          {detail.title}
+        </h1>
+        <BriefProse>{typeLabel(opportunityType)}</BriefProse>
+      </div>
+
+      <div className="rounded-xl border border-zinc-200 bg-white px-6 py-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <GeneralTab detail={detail} opportunityType={opportunityType} formatMoney={formatMoney} />
       </div>
     </div>
   )
