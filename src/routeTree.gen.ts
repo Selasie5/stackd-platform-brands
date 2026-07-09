@@ -13,7 +13,6 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SigninRouteRouteImport } from './routes/signin/route'
 import { Route as RegisterRouteRouteImport } from './routes/register/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardMockDemoRouteImport } from './routes/dashboard/mock-demo'
 import { Route as DashboardWalletRouteRouteImport } from './routes/dashboard/wallet/route'
 import { Route as DashboardSubmissionsRouteRouteImport } from './routes/dashboard/submissions/route'
 import { Route as DashboardSettingsRouteRouteImport } from './routes/dashboard/settings/route'
@@ -45,11 +44,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardMockDemoRoute = DashboardMockDemoRouteImport.update({
-  id: '/mock-demo',
-  path: '/mock-demo',
-  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardWalletRouteRoute = DashboardWalletRouteRouteImport.update({
   id: '/wallet',
@@ -125,7 +119,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
   '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
-  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
   '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
   '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
   '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
@@ -143,7 +136,6 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
   '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
-  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
   '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
   '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
   '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
@@ -162,7 +154,6 @@ export interface FileRoutesById {
   '/dashboard/settings': typeof DashboardSettingsRouteRoute
   '/dashboard/submissions': typeof DashboardSubmissionsRouteRouteWithChildren
   '/dashboard/wallet': typeof DashboardWalletRouteRoute
-  '/dashboard/mock-demo': typeof DashboardMockDemoRoute
   '/dashboard/submissions/$id': typeof DashboardSubmissionsIdRouteRoute
   '/dashboard/campaigns/$id/board': typeof DashboardCampaignsIdBoardRouteRoute
   '/dashboard/campaigns/$id/select-winners': typeof DashboardCampaignsIdSelectWinnersRouteRoute
@@ -182,7 +173,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
-    | '/dashboard/mock-demo'
     | '/dashboard/submissions/$id'
     | '/dashboard/campaigns/$id/board'
     | '/dashboard/campaigns/$id/select-winners'
@@ -200,7 +190,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
-    | '/dashboard/mock-demo'
     | '/dashboard/submissions/$id'
     | '/dashboard/campaigns/$id/board'
     | '/dashboard/campaigns/$id/select-winners'
@@ -218,7 +207,6 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/submissions'
     | '/dashboard/wallet'
-    | '/dashboard/mock-demo'
     | '/dashboard/submissions/$id'
     | '/dashboard/campaigns/$id/board'
     | '/dashboard/campaigns/$id/select-winners'
@@ -260,13 +248,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/mock-demo': {
-      id: '/dashboard/mock-demo'
-      path: '/mock-demo'
-      fullPath: '/dashboard/mock-demo'
-      preLoaderRoute: typeof DashboardMockDemoRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/dashboard/wallet': {
       id: '/dashboard/wallet'
@@ -388,7 +369,6 @@ interface DashboardRouteChildren {
   DashboardSettingsRouteRoute: typeof DashboardSettingsRouteRoute
   DashboardSubmissionsRouteRoute: typeof DashboardSubmissionsRouteRouteWithChildren
   DashboardWalletRouteRoute: typeof DashboardWalletRouteRoute
-  DashboardMockDemoRoute: typeof DashboardMockDemoRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -400,7 +380,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSettingsRouteRoute: DashboardSettingsRouteRoute,
   DashboardSubmissionsRouteRoute: DashboardSubmissionsRouteRouteWithChildren,
   DashboardWalletRouteRoute: DashboardWalletRouteRoute,
-  DashboardMockDemoRoute: DashboardMockDemoRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

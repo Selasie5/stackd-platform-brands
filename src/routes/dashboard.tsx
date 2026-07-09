@@ -218,7 +218,7 @@ function DashboardLayoutContent({
       <aside
         className={`${
           isCollapsed ? 'w-16' : 'w-64'
-        } flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-zinc-200/50 bg-[#F4F6F8] px-3 py-5 transition-all duration-300 ease-in-out dark:border-zinc-850/50 dark:bg-zinc-950`}
+        } flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-zinc-200/50 bg-zinc-50 px-3 py-5 transition-all duration-300 ease-in-out dark:border-zinc-850/50 dark:bg-zinc-950`}
       >
         <div className="flex flex-col gap-6">
           {/* Logo Header Area */}

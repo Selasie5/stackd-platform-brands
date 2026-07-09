@@ -26,7 +26,7 @@ export function LeaderboardSidebar({
 
   return (
     <aside className="w-full shrink-0 lg:w-80">
-      <div className="rounded-xl border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         <div className="border-b border-zinc-100 px-4 py-3">
           <h3 className="text-sm font-semibold text-zinc-900">Leaderboard</h3>
           <p className="text-xs text-zinc-500">Top ranked submissions</p>
