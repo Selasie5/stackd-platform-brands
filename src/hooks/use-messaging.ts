@@ -20,7 +20,6 @@ export function useConversation(
       limit: 100,
     },
     skip: options?.skip || !referenceType || !referenceId,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }

@@ -23,7 +23,6 @@ export interface BrandWallet {
 
 export function useMyBrandWallet(options?: { skip?: boolean }) {
   return useQuery<{ myBrandWallet: BrandWallet | null }>(MY_BRAND_WALLET_QUERY, {
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
     skip: options?.skip,
   })
@@ -34,7 +33,6 @@ export function useMyBrandWalletTransactions(limit = 500) {
     MY_BRAND_WALLET_TRANSACTIONS_QUERY,
     {
       variables: { limit },
-      fetchPolicy: 'cache-and-network',
       errorPolicy: 'ignore',
     }
   )

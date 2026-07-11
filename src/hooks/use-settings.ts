@@ -58,7 +58,6 @@ export interface NotificationPreferences {
 
 export function useBrand() {
   return useQuery<{ brand: BrandProfile | null }>(BRAND_QUERY, {
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -109,9 +108,7 @@ export function useChangePassword() {
 }
 
 export function useActiveSessions() {
-  return useQuery<{ activeSessions: ActiveSession[] }>(ACTIVE_SESSIONS_QUERY, {
-    fetchPolicy: 'cache-and-network',
-  })
+  return useQuery<{ activeSessions: ActiveSession[] }>(ACTIVE_SESSIONS_QUERY)
 }
 
 export function useRevokeSession() {
@@ -141,10 +138,7 @@ export function useRevokeSession() {
 
 export function useNotificationPreferences() {
   return useQuery<{ notificationPreferences: NotificationPreferences }>(
-    NOTIFICATION_PREFERENCES_QUERY,
-    {
-      fetchPolicy: 'cache-and-network',
-    }
+    NOTIFICATION_PREFERENCES_QUERY
   )
 }
 

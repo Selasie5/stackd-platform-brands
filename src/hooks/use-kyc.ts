@@ -37,7 +37,6 @@ export interface SubmitKycInput {
 
 export function useMyKycApplication() {
   return useQuery<{ myKycApplication: KycApplication | null }>(MY_KYC_APPLICATION_QUERY, {
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }

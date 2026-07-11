@@ -51,7 +51,6 @@ export function useContestSubmissions(contestId: string | undefined) {
   return useQuery<{ contestSubmissions: ContestSubmission[] }>(CONTEST_SUBMISSIONS_QUERY, {
     variables: contestId ? { contestId } : undefined,
     skip: !contestId,
-    fetchPolicy: 'cache-and-network',
   })
 }
 
