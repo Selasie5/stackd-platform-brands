@@ -618,6 +618,12 @@ function PendingActionsSection({
   )
 }
 
+function formatCompactNumber(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+  return String(n)
+}
+
 function SubmissionsOverview() {
   const { data: walletData } = useMyContests('live')
   const liveContests = walletData?.myContests ?? []
@@ -707,7 +713,14 @@ function SubmissionsOverview() {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-zinc-900">Creator #{sub.creatorId.slice(0, 6)}</p>
+                        <p className="text-sm font-medium text-zinc-900">{sub.creator?.fullName ?? `Creator #${sub.creatorId.slice(0, 6)}`}</p>
+                        {sub.creator && (sub.creator.youtubeSubscriberCount != null || sub.creator.instagramFollowerCount != null || sub.creator.tiktokFollowerCount != null) && (
+                          <p className="mt-0.5 text-xs text-zinc-400">
+                            {sub.creator.instagramFollowerCount != null && `IG ${formatCompactNumber(sub.creator.instagramFollowerCount)} `}
+                            {sub.creator.tiktokFollowerCount != null && `TT ${formatCompactNumber(sub.creator.tiktokFollowerCount)} `}
+                            {sub.creator.youtubeSubscriberCount != null && `YT ${formatCompactNumber(sub.creator.youtubeSubscriberCount)}`}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </td>

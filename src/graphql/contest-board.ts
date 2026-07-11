@@ -6,6 +6,24 @@ export const CONTEST_SUBMISSIONS_QUERY = gql`
       id
       contestId
       creatorId
+      creator {
+        id
+        fullName
+        profileImage
+        school
+        youtubeHandle
+        youtubeChannelId
+        youtubeSubscriberCount
+        youtubeChannelVerifiedAt
+        instagramHandle
+        instagramUserId
+        instagramFollowerCount
+        instagramVerifiedAt
+        tiktokHandle
+        tiktokUserId
+        tiktokFollowerCount
+        tiktokVerifiedAt
+      }
       videoUrl
       videoLink
       thumbnailUrl
@@ -18,6 +36,10 @@ export const CONTEST_SUBMISSIONS_QUERY = gql`
       submittedViews
       approvedViews
       engagementCount
+      autoFetchedViews
+      autoFetchedLikes
+      autoFetchedComments
+      videoVerifiedAt
       leaderboardScore
       placement
       rewardAmount

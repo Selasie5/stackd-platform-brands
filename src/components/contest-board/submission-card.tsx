@@ -1,4 +1,4 @@
-import { Eye, Heart, Calendar, Bookmark, Trophy } from 'lucide-react'
+import { Eye, Heart, Calendar, Bookmark, Trophy, Users, Camera, Music2 } from 'lucide-react'
 import type { ContestSubmission } from '@/hooks/use-contest-board'
 import { WatermarkedPlayer } from '@/components/contest-board/watermarked-player'
 import { VerifiedBadge } from '@/components/contest-board/verified-badge'
@@ -18,6 +18,49 @@ function formatCompactNumber(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
   return String(n)
+}
+
+function CreatorLabel({ creator }: { creator: ContestSubmission['creator'] }) {
+  if (!creator) return null
+  const hasSocialMetrics = creator.youtubeSubscriberCount != null || creator.instagramFollowerCount != null || creator.tiktokFollowerCount != null
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-zinc-100">
+        {creator.profileImage ? (
+          <img src={creator.profileImage} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[10px] font-medium text-zinc-500">
+            {creator.fullName.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-medium text-zinc-900">{creator.fullName}</p>
+        {hasSocialMetrics && (
+          <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-zinc-400">
+            {creator.youtubeSubscriberCount != null && (
+              <span className="inline-flex items-center gap-0.5">
+                <Users className="h-3 w-3" aria-hidden="true" />
+                {formatCompactNumber(creator.youtubeSubscriberCount)}
+              </span>
+            )}
+            {creator.instagramFollowerCount != null && (
+              <span className="inline-flex items-center gap-0.5">
+                <Camera className="h-3 w-3" aria-hidden="true" />
+                {formatCompactNumber(creator.instagramFollowerCount)}
+              </span>
+            )}
+            {creator.tiktokFollowerCount != null && (
+              <span className="inline-flex items-center gap-0.5">
+                <Music2 className="h-3 w-3" aria-hidden="true" />
+                {formatCompactNumber(creator.tiktokFollowerCount)}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 const STATUS_BADGE_STYLES: Record<string, { label: string; badge: string; dot: string }> = {
@@ -104,9 +147,7 @@ export function SubmissionCard({
 
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-xs font-medium text-zinc-500">
-            Creator ID: {submission.creatorId.slice(0, 8)}…
-          </p>
+          <CreatorLabel creator={submission.creator} />
           <DotBadge
             label={statusStyle.label}
             badgeClassName={statusStyle.badge}

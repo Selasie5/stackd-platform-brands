@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
-import { ChevronLeft, Eye, MessageSquare, Globe, Trophy, Video } from 'lucide-react'
+import { ChevronLeft, Eye, MessageSquare, Globe, Trophy, Video, Users, Camera, Music2 } from 'lucide-react'
 import { useMyContests } from '@/hooks/use-opportunities'
 import { useContestSubmissions } from '@/hooks/use-contest-board'
 import { cn } from '@/lib/utils'
@@ -157,6 +157,64 @@ export function SubmissionDetailPage({ submissionId }: { submissionId: string })
           </div>
 
           <aside className="w-full shrink-0 space-y-4 lg:w-72">
+            {submission.creator && (
+              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">Creator</h3>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-zinc-100">
+                    {submission.creator.profileImage ? (
+                      <img src={submission.creator.profileImage} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-zinc-500">
+                        {submission.creator.fullName.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-zinc-900">{submission.creator.fullName}</p>
+                    {submission.creator.school && (
+                      <p className="truncate text-xs text-zinc-500">{submission.creator.school}</p>
+                    )}
+                  </div>
+                </div>
+                {(submission.creator.youtubeSubscriberCount != null || submission.creator.instagramFollowerCount != null || submission.creator.tiktokFollowerCount != null) && (
+                  <div className="mt-3 space-y-1">
+                    {submission.creator.youtubeSubscriberCount != null && (
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                        <Users className="h-3.5 w-3.5" />
+                        <span>{submission.creator.youtubeSubscriberCount.toLocaleString()} YouTube</span>
+                      </div>
+                    )}
+                    {submission.creator.instagramFollowerCount != null && (
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                        <Camera className="h-3.5 w-3.5" />
+                        <span>{submission.creator.instagramFollowerCount.toLocaleString()} Instagram</span>
+                      </div>
+                    )}
+                    {submission.creator.tiktokFollowerCount != null && (
+                      <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+                        <Music2 className="h-3.5 w-3.5" />
+                        <span>{submission.creator.tiktokFollowerCount.toLocaleString()} TikTok</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {(submission.autoFetchedViews != null || submission.autoFetchedLikes != null) && (
+                  <div className="mt-3 space-y-1 border-t border-zinc-100 pt-3">
+                    <p className="text-[11px] font-medium text-zinc-400">Auto-Verified Stats</p>
+                    {submission.autoFetchedViews != null && (
+                      <p className="text-xs text-zinc-600">Views: {submission.autoFetchedViews.toLocaleString()}</p>
+                    )}
+                    {submission.autoFetchedLikes != null && (
+                      <p className="text-xs text-zinc-600">Likes: {submission.autoFetchedLikes.toLocaleString()}</p>
+                    )}
+                    {submission.autoFetchedComments != null && (
+                      <p className="text-xs text-zinc-600">Comments: {submission.autoFetchedComments.toLocaleString()}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
               <h3 className="text-sm font-semibold text-zinc-900">Actions</h3>
               <p className="mt-2 text-xs text-zinc-500">

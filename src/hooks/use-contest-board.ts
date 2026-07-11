@@ -21,10 +21,30 @@ export type SubmissionStatus =
 
 export type TargetPlatform = 'tiktok' | 'instagram' | 'youtube_shorts' | 'any'
 
+export interface CreatorBrief {
+  id: string
+  fullName: string
+  profileImage?: string | null
+  school?: string | null
+  youtubeHandle?: string | null
+  youtubeChannelId?: string | null
+  youtubeSubscriberCount?: number | null
+  youtubeChannelVerifiedAt?: string | null
+  instagramHandle?: string | null
+  instagramUserId?: string | null
+  instagramFollowerCount?: number | null
+  instagramVerifiedAt?: string | null
+  tiktokHandle?: string | null
+  tiktokUserId?: string | null
+  tiktokFollowerCount?: number | null
+  tiktokVerifiedAt?: string | null
+}
+
 export interface ContestSubmission {
   id: string
   contestId: string
   creatorId: string
+  creator?: CreatorBrief | null
   videoUrl?: string | null
   videoLink?: string | null
   thumbnailUrl?: string | null
@@ -37,6 +57,10 @@ export interface ContestSubmission {
   submittedViews: number
   approvedViews?: number | null
   engagementCount: number
+  autoFetchedViews?: number | null
+  autoFetchedLikes?: number | null
+  autoFetchedComments?: number | null
+  videoVerifiedAt?: string | null
   leaderboardScore: number
   placement?: number | null
   rewardAmount?: string | null
