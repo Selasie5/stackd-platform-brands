@@ -84,7 +84,6 @@ function extractGqlError(error: unknown): string {
 
 export function useMe() {
   return useQuery<{ me: User | null }>(ME_QUERY, {
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }

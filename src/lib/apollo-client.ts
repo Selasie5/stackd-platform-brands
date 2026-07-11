@@ -7,7 +7,33 @@ const httpLink = new HttpLink({
 
 export const apolloClient = new ApolloClient({
   link: httpLink,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          ugcOrder: {
+            read(_, { args, toReference }) {
+              return toReference({ __typename: 'UgcOrder', id: args?.id })
+            },
+          },
+          cpmDeal: {
+            read(_, { args, toReference }) {
+              return toReference({ __typename: 'CpmDeal', id: args?.id })
+            },
+          },
+          contest: {
+            read(_, { args, toReference }) {
+              return toReference({ __typename: 'Contest', id: args?.id })
+            },
+          },
+        },
+      },
+      UgcOrder: { keyFields: ['id'] },
+      CpmDeal: { keyFields: ['id'] },
+      Contest: { keyFields: ['id'] },
+      BrandWallet: { keyFields: ['id'] },
+    },
+  }),
   defaultOptions: {
     watchQuery: {
       fetchPolicy: 'cache-and-network',

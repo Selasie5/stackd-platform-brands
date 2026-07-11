@@ -1,16 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { CampaignDetail } from '@/components/campaigns/campaign-detail'
+import { CampaignDetail, CampaignExpandedView } from '@/components/campaigns/campaign-detail'
 import { UgcCreateBrief } from '@/components/campaigns/ugc-create-brief'
 import { CpmCreateBrief } from '@/components/campaigns/cpm-create-brief'
 import { ContestCreateBrief } from '@/components/campaigns/contest-create-brief'
 import { CampaignsList } from '@/components/campaigns/campaigns-list'
 
 const campaignsSearchSchema = z.object({
-  action: z.enum(['create', 'view', 'edit']).optional(),
+  action: z.enum(['create', 'view', 'edit', 'expand']).optional(),
   campaign_type: z.enum(['UGC', 'CPM', 'Contest']).optional(),
   opportunity_id: z.string().optional(),
   opportunity_type: z.enum(['UGC', 'CPM', 'Contest']).optional(),
+  tab: z.enum(['general', 'submissions', 'contest-board', 'analytics']).optional(),
+  campaign_title: z.string().optional(),
 })
 
 export const Route = createFileRoute('/dashboard/campaigns')({
@@ -19,10 +21,14 @@ export const Route = createFileRoute('/dashboard/campaigns')({
 })
 
 function CampaignsPage() {
-  const { action, campaign_type, opportunity_id, opportunity_type } = Route.useSearch()
+  const { action, campaign_type, opportunity_id, opportunity_type, tab } = Route.useSearch()
 
   if (action === 'view' && opportunity_id && opportunity_type) {
-    return <CampaignDetail opportunityId={opportunity_id} opportunityType={opportunity_type} />
+    return <CampaignDetail opportunityId={opportunity_id} opportunityType={opportunity_type} defaultTab={tab} />
+  }
+
+  if (action === 'expand' && opportunity_id && opportunity_type) {
+    return <CampaignExpandedView opportunityId={opportunity_id} opportunityType={opportunity_type} />
   }
 
   if (action === 'edit' && campaign_type === 'UGC') {

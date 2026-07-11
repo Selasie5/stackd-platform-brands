@@ -4,6 +4,7 @@ import {
   CONTEST_QUERY,
   CPM_DEAL_QUERY,
   CLOSE_OPPORTUNITY_MUTATION,
+  COMPLETE_OPPORTUNITY_MUTATION,
   CREATE_CONTEST_MUTATION,
   CREATE_CPM_DEAL_MUTATION,
   CREATE_UGC_ORDER_MUTATION,
@@ -149,7 +150,6 @@ const opportunityListRefetchQueries = [
 export function useMyUgcOrders(status?: OpportunityStatus) {
   return useQuery<{ myUgcOrders: UgcOrderSummary[] }>(MY_UGC_ORDERS_QUERY, {
     variables: status ? { status } : undefined,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -157,7 +157,6 @@ export function useMyUgcOrders(status?: OpportunityStatus) {
 export function useMyCpmDeals(status?: OpportunityStatus) {
   return useQuery<{ myCpmDeals: CpmDealSummary[] }>(MY_CPM_DEALS_QUERY, {
     variables: status ? { status } : undefined,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -165,7 +164,6 @@ export function useMyCpmDeals(status?: OpportunityStatus) {
 export function useMyContests(status?: OpportunityStatus) {
   return useQuery<{ myContests: ContestSummary[] }>(MY_CONTESTS_QUERY, {
     variables: status ? { status } : undefined,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -174,7 +172,6 @@ export function useUgcOrder(id?: string) {
   return useQuery<{ ugcOrder: UgcOrderDetail }>(UGC_ORDER_QUERY, {
     variables: id ? { id } : undefined,
     skip: !id,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -183,7 +180,6 @@ export function useCpmDeal(id?: string) {
   return useQuery<{ cpmDeal: CpmDealDetail }>(CPM_DEAL_QUERY, {
     variables: id ? { id } : undefined,
     skip: !id,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }
@@ -192,7 +188,6 @@ export function useContest(id?: string) {
   return useQuery<{ contest: ContestDetail }>(CONTEST_QUERY, {
     variables: id ? { id } : undefined,
     skip: !id,
-    fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })
 }

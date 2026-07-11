@@ -11,7 +11,7 @@ export function getRouter() {
     context: context as any,
     scrollRestoration: true,
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    defaultPreloadStaleTime: 30_000,
   })
 
   return router

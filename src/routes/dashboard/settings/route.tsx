@@ -33,9 +33,24 @@ import { useMyKycApplication } from '@/hooks/use-kyc'
 import { cn } from '@/lib/utils'
 
 const COUNTRIES = [
-  { value: 'Ghana', currency: 'GHS', flag: 'https://flagcdn.com/w40/gh.png', label: 'Ghana' },
-  { value: 'Nigeria', currency: 'NGN', flag: 'https://flagcdn.com/w40/ng.png', label: 'Nigeria' },
-  { value: 'USA', currency: 'USD', flag: 'https://flagcdn.com/w40/us.png', label: 'USA' },
+  {
+    value: 'Ghana',
+    currency: 'GHS',
+    flag: 'https://flagcdn.com/w40/gh.png',
+    label: 'Ghana',
+  },
+  {
+    value: 'Nigeria',
+    currency: 'NGN',
+    flag: 'https://flagcdn.com/w40/ng.png',
+    label: 'Nigeria',
+  },
+  {
+    value: 'USA',
+    currency: 'USD',
+    flag: 'https://flagcdn.com/w40/us.png',
+    label: 'USA',
+  },
 ]
 
 const INDUSTRIES = [
@@ -50,7 +65,10 @@ const INDUSTRIES = [
 ]
 
 const settingsSearchSchema = z.object({
-  tab: z.enum(['profile', 'kyc', 'notifications', 'security']).optional().default('profile'),
+  tab: z
+    .enum(['profile', 'kyc', 'notifications', 'security'])
+    .optional()
+    .default('profile'),
 })
 
 export const Route = createFileRoute('/dashboard/settings')({
@@ -90,11 +108,16 @@ function SettingsCard({
         'rounded-lg border bg-white',
         danger
           ? 'border-red-200/70 shadow-[0_0_0_1px_rgba(239,68,68,0.08)]'
-          : 'border-zinc-200/70 shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
+          : 'border-zinc-200/70 shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
       )}
     >
       <div className={cn('px-5 py-4', !danger && 'border-b border-zinc-100')}>
-        <h3 className={cn('text-sm font-semibold', danger ? 'text-red-600' : 'text-zinc-900')}>
+        <h3
+          className={cn(
+            'text-sm font-semibold',
+            danger ? 'text-red-600' : 'text-zinc-900',
+          )}
+        >
           {title}
         </h3>
         {description && (
@@ -137,7 +160,7 @@ function SettingsPage() {
                     'group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-[13px] transition-all duration-150',
                     isActive
                       ? 'bg-zinc-100 font-medium text-zinc-900'
-                      : 'font-normal text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700'
+                      : 'font-normal text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700',
                   )}
                 >
                   {isActive && (
@@ -146,7 +169,7 @@ function SettingsPage() {
                   <Icon
                     className={cn(
                       'h-4 w-4 shrink-0',
-                      isActive ? 'text-zinc-700' : 'text-zinc-400'
+                      isActive ? 'text-zinc-700' : 'text-zinc-400',
                     )}
                   />
                   <span className="flex-1">{item.label}</span>
@@ -185,7 +208,7 @@ function ProfilePanel() {
   const brand = brandData?.brand
   const effectiveKycStatus = resolveEffectiveKycStatus(
     user?.brand?.kycStatus,
-    kycData?.myKycApplication?.status
+    kycData?.myKycApplication?.status,
   )
   const statusLabel = formatKycStatusLabel(effectiveKycStatus)
 
@@ -196,14 +219,19 @@ function ProfilePanel() {
   if (!brand) {
     return (
       <SettingsCard title="Profile">
-        <p className="py-4 text-center text-sm text-zinc-400">Unable to load profile.</p>
+        <p className="py-4 text-center text-sm text-zinc-400">
+          Unable to load profile.
+        </p>
       </SettingsCard>
     )
   }
 
   return (
     <div className="space-y-6">
-      <SettingsCard title="Account" description="Your account information and verification status.">
+      <SettingsCard
+        title="Account"
+        description="Your account information and verification status."
+      >
         <div className="divide-y divide-zinc-100">
           <SummaryRow label="Email" value={user?.email ?? '—'} />
           <SummaryRow label="Role" value={user?.role ?? '—'} capitalize />
@@ -214,7 +242,10 @@ function ProfilePanel() {
               <button
                 type="button"
                 onClick={() =>
-                  navigate({ to: '/dashboard/settings', search: { tab: 'kyc' } })
+                  navigate({
+                    to: '/dashboard/settings',
+                    search: { tab: 'kyc' },
+                  })
                 }
                 className="inline-flex items-center gap-0.5 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
               >
@@ -226,7 +257,10 @@ function ProfilePanel() {
         </div>
       </SettingsCard>
 
-      <SettingsCard title="Edit details" description="Update your brand profile information.">
+      <SettingsCard
+        title="Edit details"
+        description="Update your brand profile information."
+      >
         <ProfileEditForm brand={brand} />
       </SettingsCard>
     </div>
@@ -269,14 +303,18 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
           <Input
             id="brand-name"
             value={form.brandName ?? ''}
-            onChange={(e) => setForm((f) => ({ ...f, brandName: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, brandName: e.target.value }))
+            }
           />
         </Field>
         <Field label="Contact name" required id="contact-name">
           <Input
             id="contact-name"
             value={form.contactName ?? ''}
-            onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, contactName: e.target.value }))
+            }
           />
         </Field>
         <Field label="City" id="city">
@@ -294,7 +332,9 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
             options={COUNTRIES.map((c) => ({
               value: c.value,
               label: c.label,
-              icon: <img src={c.flag} alt="" className="w-5 h-auto rounded-[2px]" />,
+              icon: (
+                <img src={c.flag} alt="" className="w-5 h-auto rounded-[2px]" />
+              ),
             }))}
             placeholder="Select country"
           />
@@ -313,7 +353,9 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
             id="website"
             placeholder="https://example.com"
             value={form.website ?? ''}
-            onChange={(e) => setForm((f) => ({ ...f, website: e.target.value || null }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, website: e.target.value || null }))
+            }
           />
         </Field>
       </div>
@@ -322,12 +364,19 @@ function ProfileEditForm({ brand }: { brand: BrandProfile }) {
           id="description"
           rows={3}
           value={form.description ?? ''}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, description: e.target.value }))
+          }
           className="w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-800 outline-none transition-[color,box-shadow] placeholder:text-zinc-400 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       </Field>
       <div className="flex items-center gap-3 pt-1">
-        <Button type="submit" isLoading={loading} disabled={!hasChanges || loading} size="sm">
+        <Button
+          type="submit"
+          isLoading={loading}
+          disabled={!hasChanges || loading}
+          size="sm"
+        >
           Save changes
         </Button>
         {!hasChanges && (
@@ -379,7 +428,8 @@ const NOTIFICATION_ITEMS: Array<{
 
 function NotificationTogglesPanel() {
   const { data, loading } = useNotificationPreferences()
-  const { updatePreferences, loading: saving } = useUpdateNotificationPreferences()
+  const { updatePreferences, loading: saving } =
+    useUpdateNotificationPreferences()
   const [prefs, setPrefs] = useState<NotificationPreferences | null>(null)
 
   const current = prefs ?? data?.notificationPreferences ?? null
@@ -397,11 +447,16 @@ function NotificationTogglesPanel() {
   }
 
   if (loading && !current) {
-    return <LoadingView label="Loading notification preferences…" tone="primary" />
+    return (
+      <LoadingView label="Loading notification preferences…" tone="primary" />
+    )
   }
 
   return (
-    <SettingsCard title="Notification preferences" description="Choose which notifications you receive.">
+    <SettingsCard
+      title="Notification preferences"
+      description="Choose which notifications you receive."
+    >
       <div className="divide-y divide-zinc-100">
         {NOTIFICATION_ITEMS.map((item) => (
           <div
@@ -423,13 +478,13 @@ function NotificationTogglesPanel() {
                 'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
                 'disabled:cursor-not-allowed disabled:opacity-50',
-                current?.[item.key] ? 'bg-zinc-900' : 'bg-zinc-200'
+                current?.[item.key] ? 'bg-zinc-900' : 'bg-zinc-200',
               )}
             >
               <span
                 className={cn(
                   'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform',
-                  current?.[item.key] ? 'translate-x-4' : 'translate-x-0'
+                  current?.[item.key] ? 'translate-x-4' : 'translate-x-0',
                 )}
               />
             </button>
@@ -465,7 +520,10 @@ function ChangePasswordSection() {
   }
 
   return (
-    <SettingsCard title="Change password" description="Update your account password. You will need your current password.">
+    <SettingsCard
+      title="Change password"
+      description="Update your account password. You will need your current password."
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Current password" id="current-password">
           <PasswordInput
@@ -492,7 +550,12 @@ function ChangePasswordSection() {
           <p className="text-xs text-red-500">Passwords do not match.</p>
         )}
         <div className="flex items-center gap-3 pt-1">
-          <Button type="submit" isLoading={loading} disabled={!canSubmit || loading} size="sm">
+          <Button
+            type="submit"
+            isLoading={loading}
+            disabled={!canSubmit || loading}
+            size="sm"
+          >
             Update password
           </Button>
         </div>
@@ -511,7 +574,11 @@ function SessionRow({
   revoking: boolean
 }) {
   const platformLabel =
-    session.platform === 'web' ? 'Web' : session.platform === 'mobile' ? 'Mobile' : session.platform
+    session.platform === 'web'
+      ? 'Web'
+      : session.platform === 'mobile'
+        ? 'Mobile'
+        : session.platform
 
   const lastActive = session.lastActiveAt
     ? new Date(session.lastActiveAt).toLocaleDateString(undefined, {
@@ -526,13 +593,20 @@ function SessionRow({
     <div className="flex items-center justify-between gap-4 py-3 last:pb-0">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-zinc-900">{session.deviceName}</p>
+          <p className="text-sm font-medium text-zinc-900">
+            {session.deviceName}
+          </p>
           {session.isCurrent && (
-            <DotBadge label="Current" badgeClassName="bg-blue-50 text-blue-700 ring-blue-100" dotClassName="bg-blue-500" />
+            <DotBadge
+              label="Current"
+              badgeClassName="bg-blue-50 text-blue-700 ring-blue-100"
+              dotClassName="bg-blue-500"
+            />
           )}
         </div>
         <p className="mt-0.5 text-xs text-zinc-500">
-          {platformLabel} &middot; {session.ipAddress} &middot; Last active {lastActive}
+          {platformLabel} &middot; {session.ipAddress} &middot; Last active{' '}
+          {lastActive}
         </p>
       </div>
       {!session.isCurrent && (
@@ -567,7 +641,9 @@ function SessionManagerSection() {
   if (loading && sessions.length === 0) {
     return (
       <SettingsCard title="Active sessions">
-        <p className="py-2 text-center text-sm text-zinc-400">Loading sessions...</p>
+        <p className="py-2 text-center text-sm text-zinc-400">
+          Loading sessions...
+        </p>
       </SettingsCard>
     )
   }
@@ -579,7 +655,9 @@ function SessionManagerSection() {
       danger
     >
       {sessions.length === 0 ? (
-        <p className="py-2 text-center text-sm text-zinc-400">No active sessions found.</p>
+        <p className="py-2 text-center text-sm text-zinc-400">
+          No active sessions found.
+        </p>
       ) : (
         <div className="divide-y divide-red-100/50">
           {sessions.map((session) => (
@@ -625,10 +703,7 @@ function SummaryRow({
       </div>
       <div className="flex min-w-0 items-center gap-3 shrink-0">
         <span
-          className={cn(
-            'text-sm text-zinc-900',
-            capitalize && 'capitalize'
-          )}
+          className={cn('text-sm text-zinc-900', capitalize && 'capitalize')}
         >
           {value}
         </span>

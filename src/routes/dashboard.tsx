@@ -66,6 +66,28 @@ function getCampaignCreateBreadcrumb(pathname: string, searchStr: string) {
   return 'Create'
 }
 
+function getCampaignViewOrEditBreadcrumb(pathname: string, searchStr: string) {
+  if (pathname !== '/dashboard/campaigns') return null
+
+  const params = new URLSearchParams(searchStr)
+  const action = params.get('action')
+  if (action !== 'view' && action !== 'edit' && action !== 'expand') return null
+
+  const campaignTitle = params.get('campaign_title')
+  if (campaignTitle) {
+    const decoded = campaignTitle.replace(/\+/g, ' ')
+    return decoded.length > 40 ? decoded.slice(0, 40) + '...' : decoded
+  }
+
+  const type = params.get('opportunity_type') ?? params.get('campaign_type')
+  if (type && CAMPAIGN_TYPE_BREADCRUMBS[type]) {
+    return CAMPAIGN_TYPE_BREADCRUMBS[type]
+  }
+
+  if (action === 'edit') return 'Edit'
+  return 'Campaign'
+}
+
 function getBreadcrumbs(pathname: string, searchStr: string) {
   const parts = pathname.split('/').filter(Boolean)
   const crumbs =
@@ -78,7 +100,7 @@ function getBreadcrumbs(pathname: string, searchStr: string) {
           ),
         ]
 
-  const campaignCrumb = getCampaignCreateBreadcrumb(pathname, searchStr)
+  const campaignCrumb = getCampaignCreateBreadcrumb(pathname, searchStr) ?? getCampaignViewOrEditBreadcrumb(pathname, searchStr)
   if (campaignCrumb) {
     crumbs.push(campaignCrumb)
   }
@@ -196,7 +218,7 @@ function DashboardLayoutContent({
       <aside
         className={`${
           isCollapsed ? 'w-16' : 'w-64'
-        } flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-zinc-200/50 bg-[#F4F6F8] px-3 py-5 transition-all duration-300 ease-in-out dark:border-zinc-850/50 dark:bg-zinc-950`}
+        } flex h-full shrink-0 flex-col justify-between overflow-hidden border-r border-zinc-200/50 bg-zinc-50 px-3 py-5 transition-all duration-300 ease-in-out dark:border-zinc-850/50 dark:bg-zinc-950`}
       >
         <div className="flex flex-col gap-6">
           {/* Logo Header Area */}

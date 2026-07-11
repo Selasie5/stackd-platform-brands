@@ -283,3 +283,11 @@ export const CLOSE_OPPORTUNITY_MUTATION = gql`
     }
   }
 `
+
+export const COMPLETE_OPPORTUNITY_MUTATION = gql`
+  mutation CompleteOpportunity($type: OpportunityType!, $id: ID!) {
+    completeOpportunity(type: $type, id: $id) {
+      ${opportunityTransitionFields}
+    }
+  }
+`
