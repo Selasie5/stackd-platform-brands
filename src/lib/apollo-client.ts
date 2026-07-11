@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 
 const httpLink = new HttpLink({
-  uri: `${import.meta.env.VITE_API_URL ?? 'http://localhost:4000'}/graphql`,
+  uri: `${import.meta.env.VITE_API_URL ?? 'https://stackd-platform-core.onrender.com'}/graphql`,
   credentials: 'include',
 })
 
